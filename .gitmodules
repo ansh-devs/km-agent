@@ -1,0 +1,3 @@
+[submodule "opentelemetry-collector-contrib"]
+	path = opentelemetry-collector-contrib
+	url = https://github.com/open-telemetry/opentelemetry-collector-contrib
