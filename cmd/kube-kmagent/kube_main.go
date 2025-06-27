@@ -12,9 +12,7 @@ import (
 )
 
 func main() {
-	fmt.Println("Doing something")
 	ctx := context.Background()
-
 	agent, err := kube.NewKubeAgent()
 	if err != nil {
 		log.Fatal(err)
@@ -23,12 +21,11 @@ func main() {
 	agent.FilterValidResources(ctx, agent.Logger)
 	agent.Logger.Infof("Loaded config for cluster: %s\n", agent.Cfg.Monitoring.ClusterName)
 
-	// validConfig, err := kube.FilterValidResources(ctx, client, cfg)
-	// if err != nil {
-	// 	log.Fatal("Validation error:", err)
-	// }
-
 	otelCfg, err := kube.GenerateCollectorConfig(agent.Cfg) // Generate otel config based on our agent-config
+
+	if err != nil {
+		log.Fatalf("agent could not generate collector config : %s", err.Error())
+	}
 
 	if err = agent.StartOTelWithGeneratedConfig(otelCfg); err != nil {
 		log.Fatalf("agent could not be started with current config : %s", err.Error())
