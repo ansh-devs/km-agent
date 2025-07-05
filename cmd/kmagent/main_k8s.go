@@ -10,6 +10,8 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/kloudmate/km-agent/internal/k8sagent"
 )
 
 func main() {
@@ -20,7 +22,7 @@ func main() {
 	// Handle OS signals for graceful shutdown.
 	handleSignals(cancelAppCtx)
 
-	agent, err := kube.NewK8sAgent()
+	agent, err := k8sagent.NewK8sAgent()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -28,7 +30,7 @@ func main() {
 	agent.FilterValidResources(appCtx, agent.Logger)
 	// agent.Logger.Infof("cluster in config : %s\n", agent.Cfg.Monitoring.ClusterName)
 
-	otelCfg, err := kube.GenerateCollectorConfig(agent.Cfg) // Generate otel config based on our agent-config
+	otelCfg, err := k8sagent.GenerateCollectorConfig(agent.Cfg) // Generate otel config based on our agent-config
 
 	if err != nil {
 		log.Fatalf("agent could not generate collector config : %s", err.Error())
