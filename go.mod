@@ -50,6 +50,12 @@ require (
 	go.opentelemetry.io/collector/processor/batchprocessor v0.128.0
 	go.opentelemetry.io/collector/receiver v1.34.0
 	go.opentelemetry.io/collector/receiver/otlpreceiver v0.128.0
+	go.opentelemetry.io/collector/extension/zpagesextension v0.125.0
+	go.opentelemetry.io/collector/otelcol v0.125.0
+	go.opentelemetry.io/collector/processor v1.31.0
+	go.opentelemetry.io/collector/processor/batchprocessor v0.125.0
+	go.opentelemetry.io/collector/receiver v1.31.0
+	go.opentelemetry.io/collector/receiver/otlpreceiver v0.125.0
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/apimachinery v0.33.2
 	k8s.io/client-go v0.33.1
