@@ -28,6 +28,21 @@ jobs:
           wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64 -O /usr/local/bin/yq
           chmod +x /usr/local/bin/yq
 
+      - name: Update Chart Version
+        run: |
+          NEW_VERSION=$(echo "${{ github.event.release.tag_name }}" | sed 's/^v//')
+          
+          yq e '.version = "'"$NEW_VERSION"'"' -i deployment/helm/km-kube-agent/Chart.yaml
+          yq e '.appVersion = "'"$NEW_VERSION"'"' -i deployment/helm/km-kube-agent/Chart.yaml
+
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git add deployment/helm/km-kube-agent/Chart.yaml
+          git commit -m "chore(release): update chart version to $NEW_VERSION"
+          git push origin HEAD:${{ github.event.release.target_commitish }}
+
+
+
       - name: Add external Helm repositories
         run: |
           helm repo add jetstack https://charts.jetstack.io
