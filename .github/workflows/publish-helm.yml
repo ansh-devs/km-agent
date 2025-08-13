@@ -104,7 +104,7 @@ jobs:
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
-          cp ../${{ needs.build-and-upload-release-asset.outputs.package_name }} .
+          cp ../${{ steps.package.outputs.PACKAGE_NAME }} .
           helm repo index . --url https://${{ github.repository_owner }}.github.io/${{ github.repository }}/
 
           git add .
