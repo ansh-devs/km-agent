@@ -80,7 +80,6 @@ jobs:
           cd gh-pages-repo
           ls
           cp ../${{ steps.package.outputs.PACKAGE_NAME }} .
-          cp ./index.html .
 
           sed -i "s/{{ APP_VERSION }}/${{ steps.vars.outputs.APP_VERSION }}/g" index.html
           sed -i "s/{{ CHART_VERSION }}/${{ steps.vars.outputs.CHART_VERSION }}/g" index.html
