@@ -49,7 +49,8 @@ jobs:
           echo "CHART_PATH=${CHART_PATH}" >> "$GITHUB_OUTPUT"
           echo "CHART_VERSION=${CHART_VERSION}" >> "$GITHUB_OUTPUT"
           echo "APP_VERSION=${APP_VERSION}" >> "$GITHUB_OUTPUT"
-          cat "$[INFO] : using path - {CHART_PATH}/Chart.yaml"
+          
+          cat "${CHART_PATH}/Chart.yaml"
 
       - name: Package Helm Chart
         run: |
