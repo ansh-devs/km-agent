@@ -97,7 +97,6 @@ jobs:
 
       - name: Update Helm Landing Page with Versions
         run: |
-          yq e '.version' 'helm/km-kube-agent/Chart.yaml' # example to get version
           sed -i "s|<span id=\"app-version\".*</span>|<span id=\"app-version\" class=\"mt-1 text-lg font-bold text-[#58a6ff]\">${{ needs.build-and-upload-release-asset.outputs.app_version }}</span>|g" index.html
           sed -i "s|<span id=\"chart-version\".*</span>|<span id=\"chart-version\" class=\"mt-1 text-lg font-bold text-[#58a6ff]\">${{ needs.build-and-upload-release-asset.outputs.chart_version }}</span>|g" index.html
 
