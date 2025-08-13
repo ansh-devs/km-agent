@@ -15,15 +15,6 @@ jobs:
       - name: Checkout main branch
         uses: actions/checkout@v4
         with:
-          # Checkout the main branch to get the Chart.yaml
-          fetch-depth: 0
-
-      - name: Checkout gh-pages branch
-        uses: actions/checkout@v4
-        with:
-          # Fetch the gh-pages branch to get the index.html file
-          ref: gh-pages
-          path: gh-pages-temp
           fetch-depth: 0
 
       - name: Set up Helm
@@ -45,9 +36,9 @@ jobs:
       - name: Update Chart Dependencies and Version
         id: vars
         run: |
-          # Extract and sanitize the version from the release tag
           NEW_VERSION=$(echo "${{ github.event.release.tag_name }}" | sed 's/^v//')
           CHART_PATH="deployment/helm/km-kube-agent"
+
           helm dependency update "${CHART_PATH}"
 
           yq e '.version = "'"$NEW_VERSION"'"' -i "${CHART_PATH}/Chart.yaml"
@@ -58,12 +49,12 @@ jobs:
           echo "CHART_PATH=${CHART_PATH}" >> "$GITHUB_OUTPUT"
           echo "CHART_VERSION=${CHART_VERSION}" >> "$GITHUB_OUTPUT"
           echo "APP_VERSION=${APP_VERSION}" >> "$GITHUB_OUTPUT"
+          
           cat "${CHART_PATH}/Chart.yaml"
 
       - name: Package Helm Chart
         id: package
         run: |
-          # Create the Helm chart package
           helm package ${{ steps.vars.outputs.CHART_PATH }}
           PACKAGE_NAME="km-kube-agent-${{ steps.vars.outputs.CHART_VERSION }}.tgz"
           echo "PACKAGE_NAME=${PACKAGE_NAME}" >> "$GITHUB_OUTPUT"
@@ -89,14 +80,14 @@ jobs:
           cd gh-pages-repo
 
           cp ../${{ steps.package.outputs.PACKAGE_NAME }} .
-          cp ../index.html .
 
-          helm repo index . --url https://${{ github.repository_owner }}.github.io/${{ github.repository }}/
+          cp ../index.html .
 
           sed -i "s/{{ APP_VERSION }}/${{ steps.vars.outputs.APP_VERSION }}/g" index.html
           sed -i "s/{{ CHART_VERSION }}/${{ steps.vars.outputs.CHART_VERSION }}/g" index.html
 
+          helm repo index . --url https://${{ github.repository_owner }}.github.io/${{ github.repository }}/
+
           git add .
           git commit -m "🚀 chore(release): update index and landing page for km-kube-agent ${{ steps.vars.outputs.CHART_VERSION }}" || echo "No changes to commit"
           git push origin gh-pages
-
