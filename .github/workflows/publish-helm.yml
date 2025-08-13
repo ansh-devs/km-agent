@@ -78,16 +78,15 @@ jobs:
           git clone --depth=1 --branch gh-pages --single-branch https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git gh-pages-repo
 
           cd gh-pages-repo
-
+          ls
           cp ../${{ steps.package.outputs.PACKAGE_NAME }} .
-
-          cp ../index.html .
+          cp ./index.html .
 
           sed -i "s/{{ APP_VERSION }}/${{ steps.vars.outputs.APP_VERSION }}/g" index.html
           sed -i "s/{{ CHART_VERSION }}/${{ steps.vars.outputs.CHART_VERSION }}/g" index.html
 
           helm repo index . --url https://${{ github.repository_owner }}.github.io/${{ github.repository }}/
-
+          ls
           git add .
           git commit -m "🚀 chore(release): update index and landing page for km-kube-agent ${{ steps.vars.outputs.CHART_VERSION }}" || echo "No changes to commit"
           git push origin gh-pages
