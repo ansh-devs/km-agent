@@ -53,12 +53,13 @@ jobs:
           cat "${CHART_PATH}/Chart.yaml"
 
       - name: Package Helm Chart
+        id: package
         run: |
-          # Create the Helm chart package
           helm package ${{ steps.vars.outputs.CHART_PATH }}
           PACKAGE_NAME="km-kube-agent-${{ steps.vars.outputs.CHART_VERSION }}.tgz"
           echo "PACKAGE_NAME=${PACKAGE_NAME}" >> "$GITHUB_OUTPUT"
           echo "Package created: ${PACKAGE_NAME}"
+
 
       - name: Upload Helm Chart to GitHub Release
         id: upload-release-asset
@@ -67,24 +68,23 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./${{ steps.vars.outputs.PACKAGE_NAME }}
-          asset_name: ${{ steps.vars.outputs.PACKAGE_NAME }}
+          asset_path: ./${{ steps.package.outputs.PACKAGE_NAME }}
+          asset_name: ${{ steps.package.outputs.PACKAGE_NAME }}
           asset_content_type: application/gzip
           
-      - name: Update Helm GH-Pages with Versions
+      - name: Update Helm Landing Page with Versions
         run: |
-          # Use sed to replace the placeholders with the actual version numbers
           sed -i "s/{{ APP_VERSION }}/${{ steps.vars.outputs.APP_VERSION }}/g" index.html
           sed -i "s/{{ CHART_VERSION }}/${{ steps.vars.outputs.CHART_VERSION }}/g" index.html
 
-      - name: Sync Helm Chart Repository Index on gh-pages branch
+      - name: Update Helm Chart Repository Index on gh-pages
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
           git fetch origin gh-pages
           git checkout gh-pages || git checkout --orphan gh-pages
 
-          mv ./${{ steps.vars.outputs.PACKAGE_NAME }} .
+          mv ./${{ steps.package.outputs.PACKAGE_NAME }} .
           mv ./index.html .
 
           helm repo index . --url https://${{ github.repository_owner }}.github.io/${{ github.repository }}/
