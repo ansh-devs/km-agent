@@ -63,13 +63,13 @@ jobs:
       - name: Package Helm Chart
         id: package
         run: |
+          # Create the Helm chart package
           helm package ${{ steps.vars.outputs.CHART_PATH }}
           PACKAGE_NAME="km-kube-agent-${{ steps.vars.outputs.CHART_VERSION }}.tgz"
           echo "PACKAGE_NAME=${PACKAGE_NAME}" >> "$GITHUB_OUTPUT"
           echo "Package created: ${PACKAGE_NAME}"
 
       - name: Upload Helm Chart to GitHub Release
-        id: upload-release-asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -79,21 +79,24 @@ jobs:
           asset_name: ${{ steps.package.outputs.PACKAGE_NAME }}
           asset_content_type: application/gzip
           
-      - name: Update Helm Landing Page with Versions
+      - name: Update Helm Chart Repository Index on gh-pages
         run: |
-          mv gh-pages-temp/index.html .
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+
+          git clone --depth=1 --branch gh-pages --single-branch https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git gh-pages-repo
+
+          cd gh-pages-repo
+
+          cp ../${{ steps.package.outputs.PACKAGE_NAME }} .
+          cp ../index.html .
+
+          helm repo index . --url https://${{ github.repository_owner }}.github.io/${{ github.repository }}/
+
           sed -i "s/{{ APP_VERSION }}/${{ steps.vars.outputs.APP_VERSION }}/g" index.html
           sed -i "s/{{ CHART_VERSION }}/${{ steps.vars.outputs.CHART_VERSION }}/g" index.html
 
-      - name: Update Helm Chart Repository Index on gh-pages
-        run: |
-          
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
-          mv ./${{ steps.package.outputs.PACKAGE_NAME }} .
-          git checkout gh-pages-temp || git checkout --orphan gh-pages
-          helm repo index . --url https://${{ github.repository_owner }}.github.io/${{ github.repository }}/
           git add .
-          git commit -m "🚀 chore(release): update index manifest for km-kube-agent ${{ steps.vars.outputs.CHART_VERSION }}" || echo "No changes to commit"
+          git commit -m "🚀 chore(release): update index and landing page for km-kube-agent ${{ steps.vars.outputs.CHART_VERSION }}" || echo "No changes to commit"
           git push origin gh-pages
 
