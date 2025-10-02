@@ -6,16 +6,6 @@ ARG TARGETOS=linux
 
 WORKDIR /app
 
-# Copy dependency files first for better caching
-COPY go.mod go.sum ./
-
-# Use mount cache for go modules to speed up downloads
-RUN --mount=type=cache,target=/go/pkg/mod \
-    go mod download
-
-# Copy source code
-COPY . .
-
 # build arguments for version information
 ARG VERSION=dev
 ARG COMMIT_SHA=unknown
