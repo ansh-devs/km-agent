@@ -31,7 +31,7 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: kloudmate # we may use a specific user in future releases i.e - ${{ github.actor }}
+          username: ansh-devs # we may use a specific user in future releases i.e - ${{ github.actor }}
           password: ${{ secrets.GHCR_PAT }}
 
       # extract metadata (tags, labels) for the Docker image
@@ -40,7 +40,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/kloudmate/km-kube-agent
+          images: ghcr.io/ansh-devs/km-kube-agent
           tags: |
             type=semver,pattern={{version}}
             type=raw,value=latest
@@ -56,7 +56,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          outputs: type=image,name=ghcr.io/kloudmate/km-kube-agent,push-by-digest=true,name-canonical=true,push=true
+          outputs: type=image,name=ghcr.io/ansh-devs/km-kube-agent,push-by-digest=true,name-canonical=true,push=true
           # Pass the release version and commit SHA as build arguments.
           build-args: |
             VERSION=${{ github.ref_name }}
@@ -97,7 +97,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/kloudmate/km-kube-agent
+          images: ghcr.io/ansh-devs/km-kube-agent
           tags: |
             type=semver,pattern={{version}}
             type=raw,value=latest
@@ -106,11 +106,11 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: kloudmate
+          username: ansh-devs
           password: ${{ secrets.GHCR_PAT }}
 
       - name: Create manifest list and push
         working-directory: /tmp/digests
         run: |
           docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-            $(printf 'ghcr.io/kloudmate/km-kube-agent@sha256:%s ' *)
+            $(printf 'ghcr.io/ansh-devs/km-kube-agent@sha256:%s ' *)
