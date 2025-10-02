@@ -2,8 +2,8 @@ apiVersion: v1
 entries:
   km-kube-agent:
   - apiVersion: v2
-    appVersion: 1.0.26
-    created: "2025-10-02T04:01:52.2452015Z"
+    appVersion: 1.0.27
+    created: "2025-10-02T04:06:20.297269151Z"
     dependencies:
     - condition: cert-manager.enabled
       name: cert-manager
@@ -14,7 +14,7 @@ entries:
       repository: https://open-telemetry.github.io/opentelemetry-helm-charts
       version: 0.90.0
     description: A Helm chart for Kloumate's Kubernetes flavored Agent
-    digest: 2e04215d5a29827bbce03b649ea95f4816abe97cede013949a2369d21e1d5eab
+    digest: db703bccf877059eeda3e65820fcf6ef250c85d8284afdaa7018bb65f770aa30
     home: https://www.kloudmate.com
     icon: https://avatars.githubusercontent.com/u/103623326?s=48&v=4
     keywords:
@@ -35,11 +35,11 @@ entries:
     - https://github.com/kloudmate/km-agent
     type: application
     urls:
-    - https://github.com/ansh-devs/km-agent/releases/download/1.0.26/km-kube-agent-1.0.26.tgz
-    version: 1.0.26
+    - https://github.com/ansh-devs/km-agent/releases/download/1.0.27/km-kube-agent-1.0.27.tgz
+    version: 1.0.27
   - apiVersion: v2
     appVersion: 1.0.8
-    created: "2025-10-02T04:01:52.262267855Z"
+    created: "2025-10-02T04:06:20.313700387Z"
     dependencies:
     - condition: cert-manager.enabled
       name: cert-manager
@@ -71,11 +71,11 @@ entries:
     - https://github.com/kloudmate/km-agent
     type: application
     urls:
-    - https://github.com/ansh-devs/km-agent/releases/download/1.0.26/km-kube-agent-1.0.8.tgz
+    - https://github.com/ansh-devs/km-agent/releases/download/1.0.27/km-kube-agent-1.0.8.tgz
     version: 1.0.8
   - apiVersion: v2
     appVersion: 1.0.7
-    created: "2025-10-02T04:01:52.253796084Z"
+    created: "2025-10-02T04:06:20.306029368Z"
     dependencies:
     - condition: cert-manager.enabled
       name: cert-manager
@@ -107,6 +107,6 @@ entries:
     - https://github.com/kloudmate/km-agent
     type: application
     urls:
-    - https://github.com/ansh-devs/km-agent/releases/download/1.0.26/km-kube-agent-1.0.7.tgz
+    - https://github.com/ansh-devs/km-agent/releases/download/1.0.27/km-kube-agent-1.0.7.tgz
     version: 1.0.7
-generated: "2025-10-02T04:01:52.23629191Z"
+generated: "2025-10-02T04:06:20.286214876Z"
