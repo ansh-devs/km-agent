@@ -1,0 +1,846 @@
+2025-10-02T04:01:45.5850367Z Current runner version: '2.328.0'
+2025-10-02T04:01:45.5885482Z ##[group]Runner Image Provisioner
+2025-10-02T04:01:45.5886812Z Hosted Compute Agent
+2025-10-02T04:01:45.5887851Z Version: 20250912.392
+2025-10-02T04:01:45.5888809Z Commit: d921fda672a98b64f4f82364647e2f10b2267d0b
+2025-10-02T04:01:45.5890374Z Build Date: 2025-09-12T15:23:14Z
+2025-10-02T04:01:45.5891570Z ##[endgroup]
+2025-10-02T04:01:45.5892449Z ##[group]Operating System
+2025-10-02T04:01:45.5893432Z Ubuntu
+2025-10-02T04:01:45.5894381Z 24.04.3
+2025-10-02T04:01:45.5895206Z LTS
+2025-10-02T04:01:45.5895894Z ##[endgroup]
+2025-10-02T04:01:45.5896789Z ##[group]Runner Image
+2025-10-02T04:01:45.5897720Z Image: ubuntu-24.04
+2025-10-02T04:01:45.5898602Z Version: 20250922.53.1
+2025-10-02T04:01:45.5900734Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20250922.53/images/ubuntu/Ubuntu2404-Readme.md
+2025-10-02T04:01:45.5903236Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20250922.53
+2025-10-02T04:01:45.5904913Z ##[endgroup]
+2025-10-02T04:01:45.5906586Z ##[group]GITHUB_TOKEN Permissions
+2025-10-02T04:01:45.5909369Z Contents: read
+2025-10-02T04:01:45.5910380Z Metadata: read
+2025-10-02T04:01:45.5911122Z Packages: write
+2025-10-02T04:01:45.5911983Z ##[endgroup]
+2025-10-02T04:01:45.5914682Z Secret source: Actions
+2025-10-02T04:01:45.5916028Z Prepare workflow directory
+2025-10-02T04:01:45.6252723Z Prepare all required actions
+2025-10-02T04:01:45.6307778Z Getting action download info
+2025-10-02T04:01:46.0495024Z Download action repository 'actions/checkout@v4' (SHA:08eba0b27e820071cde6df949e0beb9ba4906955)
+2025-10-02T04:01:46.4892119Z Download action repository 'docker/setup-buildx-action@v3' (SHA:e468171a9de216ec08956ac3ada2f0791b6bd435)
+2025-10-02T04:01:47.0773870Z Download action repository 'docker/login-action@v3' (SHA:5e57cd118135c172c3672efd75eb46360885c0ef)
+2025-10-02T04:01:47.6458783Z Download action repository 'docker/metadata-action@v5' (SHA:c1e51972afc2121e065aed6d45c65596fe445f3f)
+2025-10-02T04:01:48.2114158Z Download action repository 'docker/build-push-action@v5' (SHA:ca052bb54ab0790a636c9b5f226502c73d547a25)
+2025-10-02T04:01:48.8138737Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2025-10-02T04:01:49.0191858Z Complete job name: build_and_pub (linux/amd64, ubuntu-latest)
+2025-10-02T04:01:49.0876426Z ##[group]Run actions/checkout@v4
+2025-10-02T04:01:49.0877091Z with:
+2025-10-02T04:01:49.0877383Z   repository: ansh-devs/km-agent
+2025-10-02T04:01:49.0877870Z   token: ***
+2025-10-02T04:01:49.0878135Z   ssh-strict: true
+2025-10-02T04:01:49.0878404Z   ssh-user: git
+2025-10-02T04:01:49.0878682Z   persist-credentials: true
+2025-10-02T04:01:49.0878991Z   clean: true
+2025-10-02T04:01:49.0879279Z   sparse-checkout-cone-mode: true
+2025-10-02T04:01:49.0879604Z   fetch-depth: 1
+2025-10-02T04:01:49.0880223Z   fetch-tags: false
+2025-10-02T04:01:49.0880545Z   show-progress: true
+2025-10-02T04:01:49.0880813Z   lfs: false
+2025-10-02T04:01:49.0881062Z   submodules: false
+2025-10-02T04:01:49.0881362Z   set-safe-directory: true
+2025-10-02T04:01:49.0881963Z ##[endgroup]
+2025-10-02T04:01:49.1989634Z Syncing repository: ansh-devs/km-agent
+2025-10-02T04:01:49.1992155Z ##[group]Getting Git version info
+2025-10-02T04:01:49.1992999Z Working directory is '/home/runner/work/km-agent/km-agent'
+2025-10-02T04:01:49.1994306Z [command]/usr/bin/git version
+2025-10-02T04:01:49.2047200Z git version 2.51.0
+2025-10-02T04:01:49.2074149Z ##[endgroup]
+2025-10-02T04:01:49.2090360Z Temporarily overriding HOME='/home/runner/work/_temp/25414379-d330-46fa-82d3-3863b2552d56' before making global git config changes
+2025-10-02T04:01:49.2091983Z Adding repository directory to the temporary git global config as a safe directory
+2025-10-02T04:01:49.2104391Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/km-agent/km-agent
+2025-10-02T04:01:49.2141221Z Deleting the contents of '/home/runner/work/km-agent/km-agent'
+2025-10-02T04:01:49.2145296Z ##[group]Initializing the repository
+2025-10-02T04:01:49.2150194Z [command]/usr/bin/git init /home/runner/work/km-agent/km-agent
+2025-10-02T04:01:49.2245914Z hint: Using 'master' as the name for the initial branch. This default branch name
+2025-10-02T04:01:49.2247008Z hint: is subject to change. To configure the initial branch name to use in all
+2025-10-02T04:01:49.2247658Z hint: of your new repositories, which will suppress this warning, call:
+2025-10-02T04:01:49.2248072Z hint:
+2025-10-02T04:01:49.2248697Z hint: 	git config --global init.defaultBranch <name>
+2025-10-02T04:01:49.2249626Z hint:
+2025-10-02T04:01:49.2250273Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2025-10-02T04:01:49.2251125Z hint: 'development'. The just-created branch can be renamed via this command:
+2025-10-02T04:01:49.2251971Z hint:
+2025-10-02T04:01:49.2252485Z hint: 	git branch -m <name>
+2025-10-02T04:01:49.2253044Z hint:
+2025-10-02T04:01:49.2253767Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2025-10-02T04:01:49.2254948Z Initialized empty Git repository in /home/runner/work/km-agent/km-agent/.git/
+2025-10-02T04:01:49.2262945Z [command]/usr/bin/git remote add origin https://github.com/ansh-devs/km-agent
+2025-10-02T04:01:49.2298972Z ##[endgroup]
+2025-10-02T04:01:49.2299991Z ##[group]Disabling automatic garbage collection
+2025-10-02T04:01:49.2304297Z [command]/usr/bin/git config --local gc.auto 0
+2025-10-02T04:01:49.2332279Z ##[endgroup]
+2025-10-02T04:01:49.2333261Z ##[group]Setting up auth
+2025-10-02T04:01:49.2339981Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2025-10-02T04:01:49.2369661Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2025-10-02T04:01:49.2684150Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2025-10-02T04:01:49.2715381Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2025-10-02T04:01:49.2934969Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2025-10-02T04:01:49.2972335Z ##[endgroup]
+2025-10-02T04:01:49.2973710Z ##[group]Fetching the repository
+2025-10-02T04:01:49.2989656Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +0053290bb9bb8e41c77c92cc7cc3bfa42f30580e:refs/tags/1.0.26
+2025-10-02T04:01:49.8210778Z From https://github.com/ansh-devs/km-agent
+2025-10-02T04:01:49.8211748Z  * [new ref]         0053290bb9bb8e41c77c92cc7cc3bfa42f30580e -> 1.0.26
+2025-10-02T04:01:49.8280013Z ##[endgroup]
+2025-10-02T04:01:49.8281111Z ##[group]Determining the checkout info
+2025-10-02T04:01:49.8282828Z ##[endgroup]
+2025-10-02T04:01:49.8288193Z [command]/usr/bin/git sparse-checkout disable
+2025-10-02T04:01:49.8326517Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2025-10-02T04:01:49.8355215Z ##[group]Checking out the ref
+2025-10-02T04:01:49.8360024Z [command]/usr/bin/git checkout --progress --force refs/tags/1.0.26
+2025-10-02T04:01:49.8553725Z Note: switching to 'refs/tags/1.0.26'.
+2025-10-02T04:01:49.8555641Z 
+2025-10-02T04:01:49.8556111Z You are in 'detached HEAD' state. You can look around, make experimental
+2025-10-02T04:01:49.8557268Z changes and commit them, and you can discard any commits you make in this
+2025-10-02T04:01:49.8558263Z state without impacting any branches by switching back to a branch.
+2025-10-02T04:01:49.8558920Z 
+2025-10-02T04:01:49.8559312Z If you want to create a new branch to retain commits you create, you may
+2025-10-02T04:01:49.8560604Z do so (now or later) by using -c with the switch command. Example:
+2025-10-02T04:01:49.8560998Z 
+2025-10-02T04:01:49.8561179Z   git switch -c <new-branch-name>
+2025-10-02T04:01:49.8561476Z 
+2025-10-02T04:01:49.8561624Z Or undo this operation with:
+2025-10-02T04:01:49.8562155Z 
+2025-10-02T04:01:49.8562358Z   git switch -
+2025-10-02T04:01:49.8562583Z 
+2025-10-02T04:01:49.8562870Z Turn off this advice by setting config variable advice.detachedHead to false
+2025-10-02T04:01:49.8563275Z 
+2025-10-02T04:01:49.8563416Z HEAD is now at 0053290 temp changes
+2025-10-02T04:01:49.8565639Z ##[endgroup]
+2025-10-02T04:01:49.8601687Z [command]/usr/bin/git log -1 --format=%H
+2025-10-02T04:01:49.8623968Z 0053290bb9bb8e41c77c92cc7cc3bfa42f30580e
+2025-10-02T04:01:49.8908664Z ##[group]Run docker/setup-buildx-action@v3
+2025-10-02T04:01:49.8909043Z with:
+2025-10-02T04:01:49.8909310Z   driver-opts: image=moby/buildkit:latest
+2025-10-02T04:01:49.8909650Z   driver: docker-container
+2025-10-02T04:01:49.8910216Z   install: false
+2025-10-02T04:01:49.8910474Z   use: true
+2025-10-02T04:01:49.8910718Z   keep-state: false
+2025-10-02T04:01:49.8910978Z   cache-binary: true
+2025-10-02T04:01:49.8911234Z   cleanup: true
+2025-10-02T04:01:49.8911483Z ##[endgroup]
+2025-10-02T04:01:50.1769526Z ##[group]Docker info
+2025-10-02T04:01:50.1794298Z [command]/usr/bin/docker version
+2025-10-02T04:01:50.2991715Z Client: Docker Engine - Community
+2025-10-02T04:01:50.2995618Z  Version:           28.0.4
+2025-10-02T04:01:50.2996453Z  API version:       1.48
+2025-10-02T04:01:50.2996961Z  Go version:        go1.23.7
+2025-10-02T04:01:50.2997410Z  Git commit:        b8034c0
+2025-10-02T04:01:50.2997893Z  Built:             Tue Mar 25 15:07:16 2025
+2025-10-02T04:01:50.2998541Z  OS/Arch:           linux/amd64
+2025-10-02T04:01:50.2999007Z  Context:           default
+2025-10-02T04:01:50.2999286Z 
+2025-10-02T04:01:50.2999493Z Server: Docker Engine - Community
+2025-10-02T04:01:50.3000171Z  Engine:
+2025-10-02T04:01:50.3000540Z   Version:          28.0.4
+2025-10-02T04:01:50.3001023Z   API version:      1.48 (minimum version 1.24)
+2025-10-02T04:01:50.3001573Z   Go version:       go1.23.7
+2025-10-02T04:01:50.3002037Z   Git commit:       6430e49
+2025-10-02T04:01:50.3002507Z   Built:            Tue Mar 25 15:07:16 2025
+2025-10-02T04:01:50.3003042Z   OS/Arch:          linux/amd64
+2025-10-02T04:01:50.3003515Z   Experimental:     false
+2025-10-02T04:01:50.3003934Z  containerd:
+2025-10-02T04:01:50.3004304Z   Version:          1.7.27
+2025-10-02T04:01:50.3004844Z   GitCommit:        05044ec0a9a75232cad458027ca83437aae3f4da
+2025-10-02T04:01:50.3005413Z  runc:
+2025-10-02T04:01:50.3005812Z   Version:          1.2.5
+2025-10-02T04:01:50.3006256Z   GitCommit:        v1.2.5-0-g59923ef
+2025-10-02T04:01:50.3006755Z  docker-init:
+2025-10-02T04:01:50.3007117Z   Version:          0.19.0
+2025-10-02T04:01:50.3007538Z   GitCommit:        de40ad0
+2025-10-02T04:01:50.3054499Z [command]/usr/bin/docker info
+2025-10-02T04:01:52.4112557Z Client: Docker Engine - Community
+2025-10-02T04:01:52.4113247Z  Version:    28.0.4
+2025-10-02T04:01:52.4113580Z  Context:    default
+2025-10-02T04:01:52.4113915Z  Debug Mode: false
+2025-10-02T04:01:52.4114228Z  Plugins:
+2025-10-02T04:01:52.4114554Z   buildx: Docker Buildx (Docker Inc.)
+2025-10-02T04:01:52.4115000Z     Version:  v0.28.0
+2025-10-02T04:01:52.4115442Z     Path:     /usr/libexec/docker/cli-plugins/docker-buildx
+2025-10-02T04:01:52.4115967Z   compose: Docker Compose (Docker Inc.)
+2025-10-02T04:01:52.4116387Z     Version:  v2.38.2
+2025-10-02T04:01:52.4116826Z     Path:     /usr/libexec/docker/cli-plugins/docker-compose
+2025-10-02T04:01:52.4117192Z 
+2025-10-02T04:01:52.4117304Z Server:
+2025-10-02T04:01:52.4117602Z  Containers: 0
+2025-10-02T04:01:52.4118176Z   Running: 0
+2025-10-02T04:01:52.4118565Z   Paused: 0
+2025-10-02T04:01:52.4118853Z   Stopped: 0
+2025-10-02T04:01:52.4119132Z  Images: 0
+2025-10-02T04:01:52.4119429Z  Server Version: 28.0.4
+2025-10-02T04:01:52.4120124Z  Storage Driver: overlay2
+2025-10-02T04:01:52.4120493Z   Backing Filesystem: extfs
+2025-10-02T04:01:52.4120856Z   Supports d_type: true
+2025-10-02T04:01:52.4121199Z   Using metacopy: false
+2025-10-02T04:01:52.4121552Z   Native Overlay Diff: false
+2025-10-02T04:01:52.4121901Z   userxattr: false
+2025-10-02T04:01:52.4122213Z  Logging Driver: json-file
+2025-10-02T04:01:52.4122962Z  Cgroup Driver: systemd
+2025-10-02T04:01:52.4123304Z  Cgroup Version: 2
+2025-10-02T04:01:52.4123630Z  Plugins:
+2025-10-02T04:01:52.4123999Z   Volume: local
+2025-10-02T04:01:52.4124404Z   Network: bridge host ipvlan macvlan null overlay
+2025-10-02T04:01:52.4125122Z   Log: awslogs fluentd gcplogs gelf journald json-file local splunk syslog
+2025-10-02T04:01:52.4125687Z  Swarm: inactive
+2025-10-02T04:01:52.4126022Z  Runtimes: io.containerd.runc.v2 runc
+2025-10-02T04:01:52.4126731Z  Default Runtime: runc
+2025-10-02T04:01:52.4127142Z  Init Binary: docker-init
+2025-10-02T04:01:52.4127650Z  containerd version: 05044ec0a9a75232cad458027ca83437aae3f4da
+2025-10-02T04:01:52.4128214Z  runc version: v1.2.5-0-g59923ef
+2025-10-02T04:01:52.4128643Z  init version: de40ad0
+2025-10-02T04:01:52.4129011Z  Security Options:
+2025-10-02T04:01:52.4129343Z   apparmor
+2025-10-02T04:01:52.4129631Z   seccomp
+2025-10-02T04:01:52.4130273Z    Profile: builtin
+2025-10-02T04:01:52.4130592Z   cgroupns
+2025-10-02T04:01:52.4130973Z  Kernel Version: 6.11.0-1018-azure
+2025-10-02T04:01:52.4131371Z  Operating System: Ubuntu 24.04.3 LTS
+2025-10-02T04:01:52.4131747Z  OSType: linux
+2025-10-02T04:01:52.4132034Z  Architecture: x86_64
+2025-10-02T04:01:52.4132357Z  CPUs: 4
+2025-10-02T04:01:52.4132664Z  Total Memory: 15.62GiB
+2025-10-02T04:01:52.4132999Z  Name: runnervm3ublj
+2025-10-02T04:01:52.4133364Z  ID: fc682960-a2cc-4975-884a-ddab89401ab0
+2025-10-02T04:01:52.4133814Z  Docker Root Dir: /var/lib/docker
+2025-10-02T04:01:52.4134211Z  Debug Mode: false
+2025-10-02T04:01:52.4134552Z  Username: githubactions
+2025-10-02T04:01:52.4134903Z  Experimental: false
+2025-10-02T04:01:52.4135229Z  Insecure Registries:
+2025-10-02T04:01:52.4140633Z   ::1/128
+2025-10-02T04:01:52.4140983Z   127.0.0.0/8
+2025-10-02T04:01:52.4141334Z  Live Restore Enabled: false
+2025-10-02T04:01:52.4141620Z 
+2025-10-02T04:01:52.4142253Z ##[endgroup]
+2025-10-02T04:01:52.5243391Z ##[group]Buildx version
+2025-10-02T04:01:52.5265854Z [command]/usr/bin/docker buildx version
+2025-10-02T04:01:52.6249082Z github.com/docker/buildx v0.28.0 b1281b81bba797b21d9eaf256e6a13eb14419836
+2025-10-02T04:01:52.6289269Z ##[endgroup]
+2025-10-02T04:01:52.6455725Z ##[group]Inspecting default docker context
+2025-10-02T04:01:52.6604683Z [
+2025-10-02T04:01:52.6605056Z   {
+2025-10-02T04:01:52.6605341Z     "Name": "default",
+2025-10-02T04:01:52.6605698Z     "Metadata": {},
+2025-10-02T04:01:52.6606038Z     "Endpoints": {
+2025-10-02T04:01:52.6606363Z       "docker": {
+2025-10-02T04:01:52.6606760Z         "Host": "unix:///var/run/docker.sock",
+2025-10-02T04:01:52.6607205Z         "SkipTLSVerify": false
+2025-10-02T04:01:52.6607567Z       }
+2025-10-02T04:01:52.6607850Z     },
+2025-10-02T04:01:52.6608156Z     "TLSMaterial": {},
+2025-10-02T04:01:52.6608503Z     "Storage": {
+2025-10-02T04:01:52.6608838Z       "MetadataPath": "<IN MEMORY>",
+2025-10-02T04:01:52.6609249Z       "TLSPath": "<IN MEMORY>"
+2025-10-02T04:01:52.6609625Z     }
+2025-10-02T04:01:52.6610161Z   }
+2025-10-02T04:01:52.6610461Z ]
+2025-10-02T04:01:52.6611200Z ##[endgroup]
+2025-10-02T04:01:52.6611990Z ##[group]Creating a new builder instance
+2025-10-02T04:01:52.8014762Z [command]/usr/bin/docker buildx create --name builder-cb815b28-96b7-4c68-bcf7-ca5c6f6ebc0e --driver docker-container --driver-opt image=moby/buildkit:latest --buildkitd-flags --allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host --use
+2025-10-02T04:01:52.8934572Z builder-cb815b28-96b7-4c68-bcf7-ca5c6f6ebc0e
+2025-10-02T04:01:52.8971410Z ##[endgroup]
+2025-10-02T04:01:52.8972039Z ##[group]Booting builder
+2025-10-02T04:01:52.9011189Z [command]/usr/bin/docker buildx inspect --bootstrap --builder builder-cb815b28-96b7-4c68-bcf7-ca5c6f6ebc0e
+2025-10-02T04:01:52.9594937Z #1 [internal] booting buildkit
+2025-10-02T04:01:53.1097636Z #1 pulling image moby/buildkit:latest
+2025-10-02T04:01:56.1881411Z #1 pulling image moby/buildkit:latest 3.2s done
+2025-10-02T04:01:56.3391207Z #1 creating container buildx_buildkit_builder-cb815b28-96b7-4c68-bcf7-ca5c6f6ebc0e0
+2025-10-02T04:01:56.4421674Z #1 creating container buildx_buildkit_builder-cb815b28-96b7-4c68-bcf7-ca5c6f6ebc0e0 0.3s done
+2025-10-02T04:01:56.4474888Z #1 DONE 3.5s
+2025-10-02T04:01:56.4808735Z Name:          builder-cb815b28-96b7-4c68-bcf7-ca5c6f6ebc0e
+2025-10-02T04:01:56.4812419Z Driver:        docker-container
+2025-10-02T04:01:56.4812847Z Last Activity: 2025-10-02 04:01:52 +0000 UTC
+2025-10-02T04:01:56.4813144Z 
+2025-10-02T04:01:56.4813251Z Nodes:
+2025-10-02T04:01:56.4814051Z Name:                  builder-cb815b28-96b7-4c68-bcf7-ca5c6f6ebc0e0
+2025-10-02T04:01:56.4814422Z Endpoint:              unix:///var/run/docker.sock
+2025-10-02T04:01:56.4814750Z Driver Options:        image="moby/buildkit:latest"
+2025-10-02T04:01:56.4815037Z Status:                running
+2025-10-02T04:01:56.4815522Z BuildKit daemon flags: --allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host
+2025-10-02T04:01:56.4816013Z BuildKit version:      14d1ccb
+2025-10-02T04:01:56.4816309Z Platforms:             linux/amd64, linux/amd64/v2, linux/amd64/v3, linux/386
+2025-10-02T04:01:56.4816636Z Labels:
+2025-10-02T04:01:56.4816868Z  org.mobyproject.buildkit.worker.executor:         oci
+2025-10-02T04:01:56.4817237Z  org.mobyproject.buildkit.worker.hostname:         2eb9443a2e94
+2025-10-02T04:01:56.4817615Z  org.mobyproject.buildkit.worker.network:          host
+2025-10-02T04:01:56.4817972Z  org.mobyproject.buildkit.worker.oci.process-mode: sandbox
+2025-10-02T04:01:56.4818353Z  org.mobyproject.buildkit.worker.selinux.enabled:  false
+2025-10-02T04:01:56.4818723Z  org.mobyproject.buildkit.worker.snapshotter:      overlayfs
+2025-10-02T04:01:56.4819019Z GC Policy rule#0:
+2025-10-02T04:01:56.4819198Z  All:            false
+2025-10-02T04:01:56.4819506Z  Filters:        type==source.local,type==exec.cachemount,type==source.git.checkout
+2025-10-02T04:01:56.4820156Z  Keep Duration:  48h0m0s
+2025-10-02T04:01:56.4820383Z  Max Used Space: 488.3MiB
+2025-10-02T04:01:56.4820583Z GC Policy rule#1:
+2025-10-02T04:01:56.4820768Z  All:            false
+2025-10-02T04:01:56.4820958Z  Keep Duration:  1440h0m0s
+2025-10-02T04:01:56.4821156Z  Reserved Space: 7.451GiB
+2025-10-02T04:01:56.4821349Z  Max Used Space: 54.02GiB
+2025-10-02T04:01:56.4821534Z  Min Free Space: 13.97GiB
+2025-10-02T04:01:56.4821722Z GC Policy rule#2:
+2025-10-02T04:01:56.4821895Z  All:            false
+2025-10-02T04:01:56.4822069Z  Reserved Space: 7.451GiB
+2025-10-02T04:01:56.4822264Z  Max Used Space: 54.02GiB
+2025-10-02T04:01:56.4822458Z  Min Free Space: 13.97GiB
+2025-10-02T04:01:56.4822645Z GC Policy rule#3:
+2025-10-02T04:01:56.4822816Z  All:            true
+2025-10-02T04:01:56.4822992Z  Reserved Space: 7.451GiB
+2025-10-02T04:01:56.4823181Z  Max Used Space: 54.02GiB
+2025-10-02T04:01:56.4823364Z  Min Free Space: 13.97GiB
+2025-10-02T04:01:56.4859321Z ##[endgroup]
+2025-10-02T04:01:56.5880562Z ##[group]Inspect builder
+2025-10-02T04:01:56.5884093Z {
+2025-10-02T04:01:56.5885022Z   "nodes": [
+2025-10-02T04:01:56.5885507Z     {
+2025-10-02T04:01:56.5885970Z       "name": "builder-cb815b28-96b7-4c68-bcf7-ca5c6f6ebc0e0",
+2025-10-02T04:01:56.5886609Z       "endpoint": "unix:///var/run/docker.sock",
+2025-10-02T04:01:56.5887081Z       "driver-opts": [
+2025-10-02T04:01:56.5887460Z         "image=moby/buildkit:latest"
+2025-10-02T04:01:56.5887862Z       ],
+2025-10-02T04:01:56.5888185Z       "status": "running",
+2025-10-02T04:01:56.5889314Z       "buildkitd-flags": "--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host",
+2025-10-02T04:01:56.5893719Z       "buildkit": "14d1ccb",
+2025-10-02T04:01:56.5894221Z       "platforms": "linux/amd64,linux/amd64/v2,linux/amd64/v3,linux/386",
+2025-10-02T04:01:56.5894727Z       "features": {
+2025-10-02T04:01:56.5895164Z         "Automatically load images to the Docker Engine image store": true,
+2025-10-02T04:01:56.5895678Z         "Cache export": true,
+2025-10-02T04:01:56.5896003Z         "Direct push": true,
+2025-10-02T04:01:56.5896350Z         "Docker exporter": true,
+2025-10-02T04:01:56.5896736Z         "Multi-platform build": true,
+2025-10-02T04:01:56.5897458Z         "OCI exporter": true
+2025-10-02T04:01:56.5897788Z       },
+2025-10-02T04:01:56.5898026Z       "labels": {
+2025-10-02T04:01:56.5898379Z         "org.mobyproject.buildkit.worker.executor": "oci",
+2025-10-02T04:01:56.5899087Z         "org.mobyproject.buildkit.worker.hostname": "2eb9443a2e94",
+2025-10-02T04:01:56.5899715Z         "org.mobyproject.buildkit.worker.network": "host",
+2025-10-02T04:01:56.5900869Z         "org.mobyproject.buildkit.worker.oci.process-mode": "sandbox",
+2025-10-02T04:01:56.5901580Z         "org.mobyproject.buildkit.worker.selinux.enabled": "false",
+2025-10-02T04:01:56.5902245Z         "org.mobyproject.buildkit.worker.snapshotter": "overlayfs"
+2025-10-02T04:01:56.5902726Z       },
+2025-10-02T04:01:56.5902985Z       "gcPolicy": [
+2025-10-02T04:01:56.5903327Z         {
+2025-10-02T04:01:56.5903589Z           "all": false,
+2025-10-02T04:01:56.5903902Z           "filter": [
+2025-10-02T04:01:56.5904221Z             "type==source.local",
+2025-10-02T04:01:56.5904613Z             "type==exec.cachemount",
+2025-10-02T04:01:56.5905005Z             "type==source.git.checkout"
+2025-10-02T04:01:56.5905379Z           ],
+2025-10-02T04:01:56.5905671Z           "keepDuration": "48h0m0s",
+2025-10-02T04:01:56.5906184Z           "maxUsedSpace": "488.3MiB"
+2025-10-02T04:01:56.5906547Z         },
+2025-10-02T04:01:56.5906799Z         {
+2025-10-02T04:01:56.5907066Z           "all": false,
+2025-10-02T04:01:56.5907392Z           "keepDuration": "1440h0m0s",
+2025-10-02T04:01:56.5907790Z           "reservedSpace": "7.451GiB",
+2025-10-02T04:01:56.5908178Z           "maxUsedSpace": "54.02GiB",
+2025-10-02T04:01:56.5908557Z           "minFreeSpace": "13.97GiB"
+2025-10-02T04:01:56.5908914Z         },
+2025-10-02T04:01:56.5909160Z         {
+2025-10-02T04:01:56.5909407Z           "all": false,
+2025-10-02T04:01:56.5909724Z           "reservedSpace": "7.451GiB",
+2025-10-02T04:01:56.5910270Z           "maxUsedSpace": "54.02GiB",
+2025-10-02T04:01:56.5910663Z           "minFreeSpace": "13.97GiB"
+2025-10-02T04:01:56.5911025Z         },
+2025-10-02T04:01:56.5911266Z         {
+2025-10-02T04:01:56.5911523Z           "all": true,
+2025-10-02T04:01:56.5911835Z           "reservedSpace": "7.451GiB",
+2025-10-02T04:01:56.5912221Z           "maxUsedSpace": "54.02GiB",
+2025-10-02T04:01:56.5912599Z           "minFreeSpace": "13.97GiB"
+2025-10-02T04:01:56.5912942Z         }
+2025-10-02T04:01:56.5913191Z       ]
+2025-10-02T04:01:56.5913426Z     }
+2025-10-02T04:01:56.5913665Z   ],
+2025-10-02T04:01:56.5914025Z   "name": "builder-cb815b28-96b7-4c68-bcf7-ca5c6f6ebc0e",
+2025-10-02T04:01:56.5914519Z   "driver": "docker-container",
+2025-10-02T04:01:56.5914908Z   "lastActivity": "2025-10-02T04:01:52.000Z"
+2025-10-02T04:01:56.5915285Z }
+2025-10-02T04:01:56.5915857Z ##[endgroup]
+2025-10-02T04:01:56.5916365Z ##[group]BuildKit version
+2025-10-02T04:01:56.5916805Z builder-cb815b28-96b7-4c68-bcf7-ca5c6f6ebc0e0: 14d1ccb
+2025-10-02T04:01:56.5918435Z ##[endgroup]
+2025-10-02T04:01:56.6047995Z ##[group]Run docker/login-action@v3
+2025-10-02T04:01:56.6048281Z with:
+2025-10-02T04:01:56.6048453Z   registry: ghcr.io
+2025-10-02T04:01:56.6048642Z   username: ansh-devs
+2025-10-02T04:01:56.6049266Z   password: ***
+2025-10-02T04:01:56.6049457Z   logout: true
+2025-10-02T04:01:56.6049627Z ##[endgroup]
+2025-10-02T04:01:56.9082426Z Logging into ghcr.io...
+2025-10-02T04:01:57.2550703Z Login Succeeded!
+2025-10-02T04:01:57.2678602Z ##[group]Run docker/metadata-action@v5
+2025-10-02T04:01:57.2678871Z with:
+2025-10-02T04:01:57.2679066Z   images: ghcr.io/ansh-devs/km-kube-updater
+2025-10-02T04:01:57.2679381Z   tags: type=semver,pattern={{version}}
+type=raw,value=latest
+
+2025-10-02T04:01:57.2679675Z   context: workflow
+2025-10-02T04:01:57.2680353Z   github-token: ***
+2025-10-02T04:01:57.2680541Z ##[endgroup]
+2025-10-02T04:01:58.1400509Z ##[group]Context info
+2025-10-02T04:01:58.1400880Z eventName: release
+2025-10-02T04:01:58.1401250Z sha: 0053290bb9bb8e41c77c92cc7cc3bfa42f30580e
+2025-10-02T04:01:58.1401683Z ref: refs/tags/1.0.26
+2025-10-02T04:01:58.1402526Z workflow: Publish kubernetes config updater image to the registry
+2025-10-02T04:01:58.1403090Z action: meta
+2025-10-02T04:01:58.1403382Z actor: ansh-devs
+2025-10-02T04:01:58.1403683Z runNumber: 34
+2025-10-02T04:01:58.1403974Z runId: 18182964381
+2025-10-02T04:01:58.1405154Z commitDate: Thu Oct 02 2025 04:00:46 GMT+0000 (Coordinated Universal Time)
+2025-10-02T04:01:58.1406542Z ##[endgroup]
+2025-10-02T04:01:58.1413450Z ##[group]Processing images input
+2025-10-02T04:01:58.1413955Z name=ghcr.io/ansh-devs/km-kube-updater,enable=true
+2025-10-02T04:01:58.1414664Z ##[endgroup]
+2025-10-02T04:01:58.1423327Z ##[group]Processing tags input
+2025-10-02T04:01:58.1423920Z type=semver,pattern={{version}},value=,match=,enable=true,priority=900
+2025-10-02T04:01:58.1424612Z type=raw,value=latest,enable=true,priority=200
+2025-10-02T04:01:58.1425304Z ##[endgroup]
+2025-10-02T04:01:58.1426886Z ##[group]Processing flavor input
+2025-10-02T04:01:58.1427295Z latest=auto
+2025-10-02T04:01:58.1427578Z prefix=
+2025-10-02T04:01:58.1427873Z prefixLatest=false
+2025-10-02T04:01:58.1428191Z suffix=
+2025-10-02T04:01:58.1428475Z suffixLatest=false
+2025-10-02T04:01:58.1428998Z ##[endgroup]
+2025-10-02T04:01:58.1491171Z ##[group]Docker image version
+2025-10-02T04:01:58.1491573Z 1.0.26
+2025-10-02T04:01:58.1492078Z ##[endgroup]
+2025-10-02T04:01:58.1497777Z ##[group]Docker tags
+2025-10-02T04:01:58.1498233Z ghcr.io/ansh-devs/km-kube-updater:1.0.26
+2025-10-02T04:01:58.1498758Z ghcr.io/ansh-devs/km-kube-updater:latest
+2025-10-02T04:01:58.1499242Z ghcr.io/ansh-devs/km-kube-updater:latest
+2025-10-02T04:01:58.1500169Z ##[endgroup]
+2025-10-02T04:01:58.1575566Z ##[group]Docker labels
+2025-10-02T04:01:58.1576049Z org.opencontainers.image.created=2025-10-02T04:01:58.142Z
+2025-10-02T04:01:58.1576939Z org.opencontainers.image.description=KloudMate Agent for OpenTelemetry auto instrumentation
+2025-10-02T04:01:58.1577829Z org.opencontainers.image.licenses=Apache-2.0
+2025-10-02T04:01:58.1578556Z org.opencontainers.image.revision=0053290bb9bb8e41c77c92cc7cc3bfa42f30580e
+2025-10-02T04:01:58.1579440Z org.opencontainers.image.source=https://github.com/ansh-devs/km-agent
+2025-10-02T04:01:58.1580345Z org.opencontainers.image.title=km-agent
+2025-10-02T04:01:58.1581029Z org.opencontainers.image.url=https://github.com/ansh-devs/km-agent
+2025-10-02T04:01:58.1581717Z org.opencontainers.image.version=1.0.26
+2025-10-02T04:01:58.1582437Z ##[endgroup]
+2025-10-02T04:01:58.1582977Z ##[group]Annotations
+2025-10-02T04:01:58.1583496Z manifest:org.opencontainers.image.created=2025-10-02T04:01:58.142Z
+2025-10-02T04:01:58.1584534Z manifest:org.opencontainers.image.description=KloudMate Agent for OpenTelemetry auto instrumentation
+2025-10-02T04:01:58.1585510Z manifest:org.opencontainers.image.licenses=Apache-2.0
+2025-10-02T04:01:58.1586320Z manifest:org.opencontainers.image.revision=0053290bb9bb8e41c77c92cc7cc3bfa42f30580e
+2025-10-02T04:01:58.1587319Z manifest:org.opencontainers.image.source=https://github.com/ansh-devs/km-agent
+2025-10-02T04:01:58.1588120Z manifest:org.opencontainers.image.title=km-agent
+2025-10-02T04:01:58.1588884Z manifest:org.opencontainers.image.url=https://github.com/ansh-devs/km-agent
+2025-10-02T04:01:58.1589649Z manifest:org.opencontainers.image.version=1.0.26
+2025-10-02T04:01:58.1590764Z ##[endgroup]
+2025-10-02T04:01:58.1591418Z ##[group]JSON output
+2025-10-02T04:01:58.1591737Z {
+2025-10-02T04:01:58.1592011Z   "tags": [
+2025-10-02T04:01:58.1592712Z     "ghcr.io/ansh-devs/km-kube-updater:1.0.26",
+2025-10-02T04:01:58.1593273Z     "ghcr.io/ansh-devs/km-kube-updater:latest",
+2025-10-02T04:01:58.1593762Z     "ghcr.io/ansh-devs/km-kube-updater:latest"
+2025-10-02T04:01:58.1594196Z   ],
+2025-10-02T04:01:58.1594479Z   "labels": {
+2025-10-02T04:01:58.1594935Z     "org.opencontainers.image.created": "2025-10-02T04:01:58.142Z",
+2025-10-02T04:01:58.1595894Z     "org.opencontainers.image.description": "KloudMate Agent for OpenTelemetry auto instrumentation",
+2025-10-02T04:01:58.1596880Z     "org.opencontainers.image.licenses": "Apache-2.0",
+2025-10-02T04:01:58.1597654Z     "org.opencontainers.image.revision": "0053290bb9bb8e41c77c92cc7cc3bfa42f30580e",
+2025-10-02T04:01:58.1598800Z     "org.opencontainers.image.source": "https://github.com/ansh-devs/km-agent",
+2025-10-02T04:01:58.1599544Z     "org.opencontainers.image.title": "km-agent",
+2025-10-02T04:01:58.1600439Z     "org.opencontainers.image.url": "https://github.com/ansh-devs/km-agent",
+2025-10-02T04:01:58.1601185Z     "org.opencontainers.image.version": "1.0.26"
+2025-10-02T04:01:58.1601650Z   },
+2025-10-02T04:01:58.1601940Z   "annotations": [
+2025-10-02T04:01:58.1602460Z     "manifest:org.opencontainers.image.created=2025-10-02T04:01:58.142Z",
+2025-10-02T04:01:58.1603501Z     "manifest:org.opencontainers.image.description=KloudMate Agent for OpenTelemetry auto instrumentation",
+2025-10-02T04:01:58.1604498Z     "manifest:org.opencontainers.image.licenses=Apache-2.0",
+2025-10-02T04:01:58.1605359Z     "manifest:org.opencontainers.image.revision=0053290bb9bb8e41c77c92cc7cc3bfa42f30580e",
+2025-10-02T04:01:58.1606383Z     "manifest:org.opencontainers.image.source=https://github.com/ansh-devs/km-agent",
+2025-10-02T04:01:58.1607220Z     "manifest:org.opencontainers.image.title=km-agent",
+2025-10-02T04:01:58.1608017Z     "manifest:org.opencontainers.image.url=https://github.com/ansh-devs/km-agent",
+2025-10-02T04:01:58.1608788Z     "manifest:org.opencontainers.image.version=1.0.26"
+2025-10-02T04:01:58.1609287Z   ]
+2025-10-02T04:01:58.1609543Z }
+2025-10-02T04:01:58.1610306Z ##[endgroup]
+2025-10-02T04:01:58.1610877Z ##[group]Bake file definition (tags)
+2025-10-02T04:01:58.1611291Z {
+2025-10-02T04:01:58.1611566Z   "target": {
+2025-10-02T04:01:58.1611883Z     "docker-metadata-action": {
+2025-10-02T04:01:58.1612265Z       "tags": [
+2025-10-02T04:01:58.1612624Z         "ghcr.io/ansh-devs/km-kube-updater:1.0.26",
+2025-10-02T04:01:58.1613138Z         "ghcr.io/ansh-devs/km-kube-updater:latest",
+2025-10-02T04:01:58.1613590Z         "ghcr.io/ansh-devs/km-kube-updater:latest"
+2025-10-02T04:01:58.1613946Z       ],
+2025-10-02T04:01:58.1614179Z       "args": {
+2025-10-02T04:01:58.1614550Z         "DOCKER_META_IMAGES": "ghcr.io/ansh-devs/km-kube-updater",
+2025-10-02T04:01:58.1615012Z         "DOCKER_META_VERSION": "1.0.26"
+2025-10-02T04:01:58.1615347Z       }
+2025-10-02T04:01:58.1615558Z     }
+2025-10-02T04:01:58.1615770Z   }
+2025-10-02T04:01:58.1615978Z }
+2025-10-02T04:01:58.1616444Z ##[endgroup]
+2025-10-02T04:01:58.1616951Z ##[group]Bake file definition (labels)
+2025-10-02T04:01:58.1617311Z {
+2025-10-02T04:01:58.1617545Z   "target": {
+2025-10-02T04:01:58.1617841Z     "docker-metadata-action": {
+2025-10-02T04:01:58.1618155Z       "labels": {
+2025-10-02T04:01:58.1618534Z         "org.opencontainers.image.created": "2025-10-02T04:01:58.142Z",
+2025-10-02T04:01:58.1619391Z         "org.opencontainers.image.description": "KloudMate Agent for OpenTelemetry auto instrumentation",
+2025-10-02T04:01:58.1620435Z         "org.opencontainers.image.licenses": "Apache-2.0",
+2025-10-02T04:01:58.1621116Z         "org.opencontainers.image.revision": "0053290bb9bb8e41c77c92cc7cc3bfa42f30580e",
+2025-10-02T04:01:58.1621957Z         "org.opencontainers.image.source": "https://github.com/ansh-devs/km-agent",
+2025-10-02T04:01:58.1622620Z         "org.opencontainers.image.title": "km-agent",
+2025-10-02T04:01:58.1623261Z         "org.opencontainers.image.url": "https://github.com/ansh-devs/km-agent",
+2025-10-02T04:01:58.1624126Z         "org.opencontainers.image.version": "1.0.26"
+2025-10-02T04:01:58.1624558Z       }
+2025-10-02T04:01:58.1624800Z     }
+2025-10-02T04:01:58.1625034Z   }
+2025-10-02T04:01:58.1625271Z }
+2025-10-02T04:01:58.1625727Z ##[endgroup]
+2025-10-02T04:01:58.1626237Z ##[group]Bake file definition (annotations)
+2025-10-02T04:01:58.1626618Z {
+2025-10-02T04:01:58.1626859Z   "target": {
+2025-10-02T04:01:58.1627160Z     "docker-metadata-action": {
+2025-10-02T04:01:58.1627513Z       "annotations": [
+2025-10-02T04:01:58.1628001Z         "manifest:org.opencontainers.image.created=2025-10-02T04:01:58.142Z",
+2025-10-02T04:01:58.1628952Z         "manifest:org.opencontainers.image.description=KloudMate Agent for OpenTelemetry auto instrumentation",
+2025-10-02T04:01:58.1630199Z         "manifest:org.opencontainers.image.licenses=Apache-2.0",
+2025-10-02T04:01:58.1630973Z         "manifest:org.opencontainers.image.revision=0053290bb9bb8e41c77c92cc7cc3bfa42f30580e",
+2025-10-02T04:01:58.1631885Z         "manifest:org.opencontainers.image.source=https://github.com/ansh-devs/km-agent",
+2025-10-02T04:01:58.1632625Z         "manifest:org.opencontainers.image.title=km-agent",
+2025-10-02T04:01:58.1633332Z         "manifest:org.opencontainers.image.url=https://github.com/ansh-devs/km-agent",
+2025-10-02T04:01:58.1634081Z         "manifest:org.opencontainers.image.version=1.0.26"
+2025-10-02T04:01:58.1634530Z       ]
+2025-10-02T04:01:58.1634766Z     }
+2025-10-02T04:01:58.1635005Z   }
+2025-10-02T04:01:58.1635237Z }
+2025-10-02T04:01:58.1635681Z ##[endgroup]
+2025-10-02T04:01:58.1841823Z ##[group]Run docker/build-push-action@v5
+2025-10-02T04:01:58.1842094Z with:
+2025-10-02T04:01:58.1842255Z   context: .
+2025-10-02T04:01:58.1842445Z   file: ./updater.Dockerfile
+2025-10-02T04:01:58.1842661Z   platforms: linux/amd64
+2025-10-02T04:01:58.1844359Z   labels: org.opencontainers.image.created=2025-10-02T04:01:58.142Z
+org.opencontainers.image.description=KloudMate Agent for OpenTelemetry auto instrumentation
+org.opencontainers.image.licenses=Apache-2.0
+org.opencontainers.image.revision=0053290bb9bb8e41c77c92cc7cc3bfa42f30580e
+org.opencontainers.image.source=https://github.com/ansh-devs/km-agent
+org.opencontainers.image.title=km-agent
+org.opencontainers.image.url=https://github.com/ansh-devs/km-agent
+org.opencontainers.image.version=1.0.26
+2025-10-02T04:01:58.1846124Z   cache-from: type=gha
+2025-10-02T04:01:58.1846332Z   cache-to: type=gha,mode=max
+2025-10-02T04:01:58.1846805Z   outputs: type=image,name=ghcr.io/ansh-devs/km-kube-updater,push-by-digest=true,name-canonical=true,push=true
+2025-10-02T04:01:58.1847380Z   build-args: VERSION=1.0.26
+COMMIT_SHA=0053290bb9bb8e41c77c92cc7cc3bfa42f30580e
+
+2025-10-02T04:01:58.1847729Z   load: false
+2025-10-02T04:01:58.1847903Z   no-cache: false
+2025-10-02T04:01:58.1848072Z   pull: false
+2025-10-02T04:01:58.1848235Z   push: false
+2025-10-02T04:01:58.1848523Z   github-token: ***
+2025-10-02T04:01:58.1848709Z env:
+2025-10-02T04:01:58.1848891Z   DOCKER_METADATA_OUTPUT_VERSION: 1.0.26
+2025-10-02T04:01:58.1849478Z   DOCKER_METADATA_OUTPUT_TAGS: ghcr.io/ansh-devs/km-kube-updater:1.0.26
+ghcr.io/ansh-devs/km-kube-updater:latest
+ghcr.io/ansh-devs/km-kube-updater:latest
+2025-10-02T04:01:58.1851901Z   DOCKER_METADATA_OUTPUT_LABELS: org.opencontainers.image.created=2025-10-02T04:01:58.142Z
+org.opencontainers.image.description=KloudMate Agent for OpenTelemetry auto instrumentation
+org.opencontainers.image.licenses=Apache-2.0
+org.opencontainers.image.revision=0053290bb9bb8e41c77c92cc7cc3bfa42f30580e
+org.opencontainers.image.source=https://github.com/ansh-devs/km-agent
+org.opencontainers.image.title=km-agent
+org.opencontainers.image.url=https://github.com/ansh-devs/km-agent
+org.opencontainers.image.version=1.0.26
+2025-10-02T04:01:58.1855514Z   DOCKER_METADATA_OUTPUT_ANNOTATIONS: manifest:org.opencontainers.image.created=2025-10-02T04:01:58.142Z
+manifest:org.opencontainers.image.description=KloudMate Agent for OpenTelemetry auto instrumentation
+manifest:org.opencontainers.image.licenses=Apache-2.0
+manifest:org.opencontainers.image.revision=0053290bb9bb8e41c77c92cc7cc3bfa42f30580e
+manifest:org.opencontainers.image.source=https://github.com/ansh-devs/km-agent
+manifest:org.opencontainers.image.title=km-agent
+manifest:org.opencontainers.image.url=https://github.com/ansh-devs/km-agent
+manifest:org.opencontainers.image.version=1.0.26
+2025-10-02T04:01:58.1861820Z   DOCKER_METADATA_OUTPUT_JSON: {"tags":["ghcr.io/ansh-devs/km-kube-updater:1.0.26","ghcr.io/ansh-devs/km-kube-updater:latest","ghcr.io/ansh-devs/km-kube-updater:latest"],"labels":{"org.opencontainers.image.created":"2025-10-02T04:01:58.142Z","org.opencontainers.image.description":"KloudMate Agent for OpenTelemetry auto instrumentation","org.opencontainers.image.licenses":"Apache-2.0","org.opencontainers.image.revision":"0053290bb9bb8e41c77c92cc7cc3bfa42f30580e","org.opencontainers.image.source":"https://github.com/ansh-devs/km-agent","org.opencontainers.image.title":"km-agent","org.opencontainers.image.url":"https://github.com/ansh-devs/km-agent","org.opencontainers.image.version":"1.0.26"},"annotations":["manifest:org.opencontainers.image.created=2025-10-02T04:01:58.142Z","manifest:org.opencontainers.image.description=KloudMate Agent for OpenTelemetry auto instrumentation","manifest:org.opencontainers.image.licenses=Apache-2.0","manifest:org.opencontainers.image.revision=0053290bb9bb8e41c77c92cc7cc3bfa42f30580e","manifest:org.opencontainers.image.source=https://github.com/ansh-devs/km-agent","manifest:org.opencontainers.image.title=km-agent","manifest:org.opencontainers.image.url=https://github.com/ansh-devs/km-agent","manifest:org.opencontainers.image.version=1.0.26"]}
+2025-10-02T04:01:58.1866522Z   DOCKER_METADATA_OUTPUT_BAKE_FILE_TAGS: /home/runner/work/_temp/docker-actions-toolkit-k7O2ur/docker-metadata-action-bake-tags.json
+2025-10-02T04:01:58.1867366Z   DOCKER_METADATA_OUTPUT_BAKE_FILE_LABELS: /home/runner/work/_temp/docker-actions-toolkit-k7O2ur/docker-metadata-action-bake-labels.json
+2025-10-02T04:01:58.1868574Z   DOCKER_METADATA_OUTPUT_BAKE_FILE_ANNOTATIONS: /home/runner/work/_temp/docker-actions-toolkit-k7O2ur/docker-metadata-action-bake-annotations.json
+2025-10-02T04:01:58.1869521Z   DOCKER_METADATA_OUTPUT_BAKE_FILE: /home/runner/work/_temp/docker-actions-toolkit-k7O2ur/docker-metadata-action-bake.json
+2025-10-02T04:01:58.1870156Z ##[endgroup]
+2025-10-02T04:01:58.4127904Z ##[group]GitHub Actions runtime token ACs
+2025-10-02T04:01:58.4138986Z refs/heads/refs/tags/1.0.26: read/write
+2025-10-02T04:01:58.4140372Z refs/heads/develop: read
+2025-10-02T04:01:58.4141456Z ##[endgroup]
+2025-10-02T04:01:58.4142012Z ##[group]Docker info
+2025-10-02T04:01:58.4185225Z [command]/usr/bin/docker version
+2025-10-02T04:01:58.4365760Z Client: Docker Engine - Community
+2025-10-02T04:01:58.4368897Z  Version:           28.0.4
+2025-10-02T04:01:58.4369273Z  API version:       1.48
+2025-10-02T04:01:58.4369611Z  Go version:        go1.23.7
+2025-10-02T04:01:58.4370124Z  Git commit:        b8034c0
+2025-10-02T04:01:58.4370484Z  Built:             Tue Mar 25 15:07:16 2025
+2025-10-02T04:01:58.4370904Z  OS/Arch:           linux/amd64
+2025-10-02T04:01:58.4371250Z  Context:           default
+2025-10-02T04:01:58.4371473Z 
+2025-10-02T04:01:58.4371617Z Server: Docker Engine - Community
+2025-10-02T04:01:58.4371983Z  Engine:
+2025-10-02T04:01:58.4372240Z   Version:          28.0.4
+2025-10-02T04:01:58.4372615Z   API version:      1.48 (minimum version 1.24)
+2025-10-02T04:01:58.4373036Z   Go version:       go1.23.7
+2025-10-02T04:01:58.4373383Z   Git commit:       6430e49
+2025-10-02T04:01:58.4373744Z   Built:            Tue Mar 25 15:07:16 2025
+2025-10-02T04:01:58.4374174Z   OS/Arch:          linux/amd64
+2025-10-02T04:01:58.4374542Z   Experimental:     false
+2025-10-02T04:01:58.4374882Z  containerd:
+2025-10-02T04:01:58.4375172Z   Version:          1.7.27
+2025-10-02T04:01:58.4375584Z   GitCommit:        05044ec0a9a75232cad458027ca83437aae3f4da
+2025-10-02T04:01:58.4376049Z  runc:
+2025-10-02T04:01:58.4376312Z   Version:          1.2.5
+2025-10-02T04:01:58.4376655Z   GitCommit:        v1.2.5-0-g59923ef
+2025-10-02T04:01:58.4377039Z  docker-init:
+2025-10-02T04:01:58.4377318Z   Version:          0.19.0
+2025-10-02T04:01:58.4377655Z   GitCommit:        de40ad0
+2025-10-02T04:01:58.4416973Z [command]/usr/bin/docker info
+2025-10-02T04:01:58.5110526Z Client: Docker Engine - Community
+2025-10-02T04:01:58.5111001Z  Version:    28.0.4
+2025-10-02T04:01:58.5111321Z  Context:    default
+2025-10-02T04:01:58.5111658Z  Debug Mode: false
+2025-10-02T04:01:58.5111977Z  Plugins:
+2025-10-02T04:01:58.5112299Z   buildx: Docker Buildx (Docker Inc.)
+2025-10-02T04:01:58.5112735Z     Version:  v0.28.0
+2025-10-02T04:01:58.5113146Z     Path:     /usr/libexec/docker/cli-plugins/docker-buildx
+2025-10-02T04:01:58.5113646Z   compose: Docker Compose (Docker Inc.)
+2025-10-02T04:01:58.5114391Z     Version:  v2.38.2
+2025-10-02T04:01:58.5114789Z     Path:     /usr/libexec/docker/cli-plugins/docker-compose
+2025-10-02T04:01:58.5115147Z 
+2025-10-02T04:01:58.5115252Z Server:
+2025-10-02T04:01:58.5115515Z  Containers: 1
+2025-10-02T04:01:58.5115787Z   Running: 1
+2025-10-02T04:01:58.5116055Z   Paused: 0
+2025-10-02T04:01:58.5116316Z   Stopped: 0
+2025-10-02T04:01:58.5116574Z  Images: 1
+2025-10-02T04:01:58.5116847Z  Server Version: 28.0.4
+2025-10-02T04:01:58.5117171Z  Storage Driver: overlay2
+2025-10-02T04:01:58.5117507Z   Backing Filesystem: extfs
+2025-10-02T04:01:58.5117849Z   Supports d_type: true
+2025-10-02T04:01:58.5118166Z   Using metacopy: false
+2025-10-02T04:01:58.5118496Z   Native Overlay Diff: false
+2025-10-02T04:01:58.5118833Z   userxattr: false
+2025-10-02T04:01:58.5119144Z  Logging Driver: json-file
+2025-10-02T04:01:58.5119668Z  Cgroup Driver: systemd
+2025-10-02T04:01:58.5120174Z  Cgroup Version: 2
+2025-10-02T04:01:58.5120448Z  Plugins:
+2025-10-02T04:01:58.5120704Z   Volume: local
+2025-10-02T04:01:58.5121047Z   Network: bridge host ipvlan macvlan null overlay
+2025-10-02T04:01:58.5121667Z   Log: awslogs fluentd gcplogs gelf journald json-file local splunk syslog
+2025-10-02T04:01:58.5122227Z  Swarm: inactive
+2025-10-02T04:01:58.5122558Z  Runtimes: io.containerd.runc.v2 runc
+2025-10-02T04:01:58.5122966Z  Default Runtime: runc
+2025-10-02T04:01:58.5123292Z  Init Binary: docker-init
+2025-10-02T04:01:58.5123752Z  containerd version: 05044ec0a9a75232cad458027ca83437aae3f4da
+2025-10-02T04:01:58.5124268Z  runc version: v1.2.5-0-g59923ef
+2025-10-02T04:01:58.5124642Z  init version: de40ad0
+2025-10-02T04:01:58.5124960Z  Security Options:
+2025-10-02T04:01:58.5125246Z   apparmor
+2025-10-02T04:01:58.5125507Z   seccomp
+2025-10-02T04:01:58.5125761Z    Profile: builtin
+2025-10-02T04:01:58.5126047Z   cgroupns
+2025-10-02T04:01:58.5126349Z  Kernel Version: 6.11.0-1018-azure
+2025-10-02T04:01:58.5126696Z  Operating System: Ubuntu 24.04.3 LTS
+2025-10-02T04:01:58.5126939Z  OSType: linux
+2025-10-02T04:01:58.5127123Z  Architecture: x86_64
+2025-10-02T04:01:58.5127310Z  CPUs: 4
+2025-10-02T04:01:58.5127473Z  Total Memory: 15.62GiB
+2025-10-02T04:01:58.5127655Z  Name: runnervm3ublj
+2025-10-02T04:01:58.5127857Z  ID: fc682960-a2cc-4975-884a-ddab89401ab0
+2025-10-02T04:01:58.5128106Z  Docker Root Dir: /var/lib/docker
+2025-10-02T04:01:58.5128326Z  Debug Mode: false
+2025-10-02T04:01:58.5128507Z  Username: githubactions
+2025-10-02T04:01:58.5128699Z  Experimental: false
+2025-10-02T04:01:58.5128888Z  Insecure Registries:
+2025-10-02T04:01:58.5129083Z   ::1/128
+2025-10-02T04:01:58.5129229Z   127.0.0.0/8
+2025-10-02T04:01:58.5129398Z  Live Restore Enabled: false
+2025-10-02T04:01:58.5129533Z 
+2025-10-02T04:01:58.5131377Z ##[endgroup]
+2025-10-02T04:01:58.5131913Z ##[group]Proxy configuration
+2025-10-02T04:01:58.5135082Z No proxy configuration found
+2025-10-02T04:01:58.5136009Z ##[endgroup]
+2025-10-02T04:01:58.5925336Z ##[group]Buildx version
+2025-10-02T04:01:58.5956245Z [command]/usr/bin/docker buildx version
+2025-10-02T04:01:58.6507167Z github.com/docker/buildx v0.28.0 b1281b81bba797b21d9eaf256e6a13eb14419836
+2025-10-02T04:01:58.6540282Z ##[endgroup]
+2025-10-02T04:01:58.6540643Z ##[group]Builder info
+2025-10-02T04:01:58.7438178Z {
+2025-10-02T04:01:58.7438540Z   "nodes": [
+2025-10-02T04:01:58.7438829Z     {
+2025-10-02T04:01:58.7439130Z       "name": "builder-cb815b28-96b7-4c68-bcf7-ca5c6f6ebc0e0",
+2025-10-02T04:01:58.7439483Z       "endpoint": "unix:///var/run/docker.sock",
+2025-10-02T04:01:58.7439942Z       "driver-opts": [
+2025-10-02T04:01:58.7440197Z         "image=moby/buildkit:latest"
+2025-10-02T04:01:58.7440420Z       ],
+2025-10-02T04:01:58.7440577Z       "status": "running",
+2025-10-02T04:01:58.7441049Z       "buildkitd-flags": "--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host",
+2025-10-02T04:01:58.7441555Z       "buildkit": "14d1ccb",
+2025-10-02T04:01:58.7441853Z       "platforms": "linux/amd64,linux/amd64/v2,linux/amd64/v3,linux/386",
+2025-10-02T04:01:58.7442735Z       "features": {
+2025-10-02T04:01:58.7443011Z         "Automatically load images to the Docker Engine image store": true,
+2025-10-02T04:01:58.7443350Z         "Cache export": true,
+2025-10-02T04:01:58.7443564Z         "Direct push": true,
+2025-10-02T04:01:58.7443771Z         "Docker exporter": true,
+2025-10-02T04:01:58.7443999Z         "Multi-platform build": true,
+2025-10-02T04:01:58.7444230Z         "OCI exporter": true
+2025-10-02T04:01:58.7444420Z       },
+2025-10-02T04:01:58.7444570Z       "labels": {
+2025-10-02T04:01:58.7444797Z         "org.mobyproject.buildkit.worker.executor": "oci",
+2025-10-02T04:01:58.7445158Z         "org.mobyproject.buildkit.worker.hostname": "2eb9443a2e94",
+2025-10-02T04:01:58.7445513Z         "org.mobyproject.buildkit.worker.network": "host",
+2025-10-02T04:01:58.7446008Z         "org.mobyproject.buildkit.worker.oci.process-mode": "sandbox",
+2025-10-02T04:01:58.7446416Z         "org.mobyproject.buildkit.worker.selinux.enabled": "false",
+2025-10-02T04:01:58.7446803Z         "org.mobyproject.buildkit.worker.snapshotter": "overlayfs"
+2025-10-02T04:01:58.7447101Z       },
+2025-10-02T04:01:58.7447254Z       "gcPolicy": [
+2025-10-02T04:01:58.7447418Z         {
+2025-10-02T04:01:58.7447577Z           "all": false,
+2025-10-02T04:01:58.7447752Z           "filter": [
+2025-10-02T04:01:58.7447946Z             "type==source.local",
+2025-10-02T04:01:58.7448173Z             "type==exec.cachemount",
+2025-10-02T04:01:58.7448409Z             "type==source.git.checkout"
+2025-10-02T04:01:58.7448636Z           ],
+2025-10-02T04:01:58.7448804Z           "keepDuration": "48h0m0s"
+2025-10-02T04:01:58.7449012Z         },
+2025-10-02T04:01:58.7449162Z         {
+2025-10-02T04:01:58.7449309Z           "all": false,
+2025-10-02T04:01:58.7449507Z           "keepDuration": "1440h0m0s"
+2025-10-02T04:01:58.7449716Z         },
+2025-10-02T04:01:58.7450125Z         {
+2025-10-02T04:01:58.7450323Z           "all": false
+2025-10-02T04:01:58.7450499Z         },
+2025-10-02T04:01:58.7450647Z         {
+2025-10-02T04:01:58.7450795Z           "all": true
+2025-10-02T04:01:58.7450966Z         }
+2025-10-02T04:01:58.7451114Z       ]
+2025-10-02T04:01:58.7451251Z     }
+2025-10-02T04:01:58.7451394Z   ],
+2025-10-02T04:01:58.7451600Z   "name": "builder-cb815b28-96b7-4c68-bcf7-ca5c6f6ebc0e",
+2025-10-02T04:01:58.7451898Z   "driver": "docker-container",
+2025-10-02T04:01:58.7452136Z   "lastActivity": "2025-10-02T04:01:52.000Z"
+2025-10-02T04:01:58.7452356Z }
+2025-10-02T04:01:58.7452748Z ##[endgroup]
+2025-10-02T04:01:58.9073422Z [command]/usr/bin/docker buildx build --build-arg VERSION=1.0.26 --build-arg COMMIT_SHA=0053290bb9bb8e41c77c92cc7cc3bfa42f30580e --cache-from type=gha --cache-to type=gha,mode=max --file ./updater.Dockerfile --iidfile /home/runner/work/_temp/docker-actions-toolkit-a1EViR/build-iidfile-d550d0b5fd.txt --label org.opencontainers.image.created=2025-10-02T04:01:58.142Z --label org.opencontainers.image.description=KloudMate Agent for OpenTelemetry auto instrumentation --label org.opencontainers.image.licenses=Apache-2.0 --label org.opencontainers.image.revision=0053290bb9bb8e41c77c92cc7cc3bfa42f30580e --label org.opencontainers.image.source=https://github.com/ansh-devs/km-agent --label org.opencontainers.image.title=km-agent --label org.opencontainers.image.url=https://github.com/ansh-devs/km-agent --label org.opencontainers.image.version=1.0.26 --output type=image,name=ghcr.io/ansh-devs/km-kube-updater,push-by-digest=true,name-canonical=true,push=true --platform linux/amd64 --metadata-file /home/runner/work/_temp/docker-actions-toolkit-a1EViR/build-metadata-923906d527.json .
+2025-10-02T04:01:59.1660772Z #0 building with "builder-cb815b28-96b7-4c68-bcf7-ca5c6f6ebc0e" instance using docker-container driver
+2025-10-02T04:01:59.1661262Z 
+2025-10-02T04:01:59.1661430Z #1 [internal] load build definition from updater.Dockerfile
+2025-10-02T04:01:59.1661775Z #1 transferring dockerfile: 729B done
+2025-10-02T04:01:59.1662005Z #1 DONE 0.0s
+2025-10-02T04:01:59.1662104Z 
+2025-10-02T04:01:59.1662257Z #2 [auth] library/alpine:pull token for registry-1.docker.io
+2025-10-02T04:01:59.3162252Z #2 DONE 0.0s
+2025-10-02T04:01:59.3162465Z 
+2025-10-02T04:01:59.3162718Z #3 [auth] library/golang:pull token for registry-1.docker.io
+2025-10-02T04:01:59.3163158Z #3 DONE 0.0s
+2025-10-02T04:01:59.3163285Z 
+2025-10-02T04:01:59.3163463Z #4 [internal] load metadata for docker.io/library/golang:alpine
+2025-10-02T04:01:59.6769379Z #4 DONE 0.6s
+2025-10-02T04:01:59.6769609Z 
+2025-10-02T04:01:59.6770032Z #5 [internal] load metadata for docker.io/library/alpine:latest
+2025-10-02T04:01:59.7914833Z #5 DONE 0.6s
+2025-10-02T04:01:59.7915090Z 
+2025-10-02T04:01:59.7915249Z #6 [internal] load .dockerignore
+2025-10-02T04:01:59.7915683Z #6 transferring context: 80B done
+2025-10-02T04:01:59.7916071Z #6 DONE 0.0s
+2025-10-02T04:01:59.7916275Z 
+2025-10-02T04:01:59.7917750Z #7 [buildstage 1/3] FROM docker.io/library/golang:alpine@sha256:b6ed3fd0452c0e9bcdef5597f29cc1418f61672e9d3a2f55bf02e7222c014abd
+2025-10-02T04:01:59.7919095Z #7 resolve docker.io/library/golang:alpine@sha256:b6ed3fd0452c0e9bcdef5597f29cc1418f61672e9d3a2f55bf02e7222c014abd done
+2025-10-02T04:01:59.7920161Z #7 DONE 0.0s
+2025-10-02T04:01:59.7920358Z 
+2025-10-02T04:01:59.7920972Z #8 [stage-1 1/2] FROM docker.io/library/alpine:latest@sha256:4bcff63911fcb4448bd4fdacec207030997caf25e9bea4045fa6c8c44de311d1
+2025-10-02T04:01:59.7921967Z #8 resolve docker.io/library/alpine:latest@sha256:4bcff63911fcb4448bd4fdacec207030997caf25e9bea4045fa6c8c44de311d1 done
+2025-10-02T04:01:59.7922558Z #8 DONE 0.0s
+2025-10-02T04:01:59.7922696Z 
+2025-10-02T04:01:59.7922835Z #9 importing cache manifest from gha:13269758880641522870
+2025-10-02T04:01:59.7923118Z #9 DONE 0.1s
+2025-10-02T04:01:59.8940019Z 
+2025-10-02T04:01:59.8941021Z #7 [buildstage 1/3] FROM docker.io/library/golang:alpine@sha256:b6ed3fd0452c0e9bcdef5597f29cc1418f61672e9d3a2f55bf02e7222c014abd
+2025-10-02T04:01:59.8942467Z #7 sha256:4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1 32B / 32B 0.1s done
+2025-10-02T04:02:00.0449676Z #7 sha256:a47af78ce4e7644116937dd73c4624dd335cedafdcfbb998d89e8c4d7c652854 126B / 126B 0.1s done
+2025-10-02T04:02:00.0451203Z #7 sha256:40e451c10b31532d8616ff155adb8383bcfe95b7388ad69363af6512986430f9 282.44kB / 282.44kB 0.2s done
+2025-10-02T04:02:00.0452342Z #7 sha256:330457f0054be4c07fbaeac90483ac4f534113ccd944fe16beb9e079a3ab3a36 1.05MB / 60.05MB 0.2s
+2025-10-02T04:02:00.1957261Z #7 ...
+2025-10-02T04:02:00.1957496Z 
+2025-10-02T04:02:00.1957965Z #8 [stage-1 1/2] FROM docker.io/library/alpine:latest@sha256:4bcff63911fcb4448bd4fdacec207030997caf25e9bea4045fa6c8c44de311d1
+2025-10-02T04:02:00.1958819Z #8 sha256:9824c27679d3b27c5e1cb00a73adb6f4f8d556994111c12db3c5d61a0c843df8 3.80MB / 3.80MB 0.2s done
+2025-10-02T04:02:00.1959435Z #8 extracting sha256:9824c27679d3b27c5e1cb00a73adb6f4f8d556994111c12db3c5d61a0c843df8 0.1s done
+2025-10-02T04:02:00.1959970Z #8 DONE 0.3s
+2025-10-02T04:02:00.1960073Z 
+2025-10-02T04:02:00.1960459Z #7 [buildstage 1/3] FROM docker.io/library/golang:alpine@sha256:b6ed3fd0452c0e9bcdef5597f29cc1418f61672e9d3a2f55bf02e7222c014abd
+2025-10-02T04:02:00.1961168Z #7 sha256:330457f0054be4c07fbaeac90483ac4f534113ccd944fe16beb9e079a3ab3a36 24.12MB / 60.05MB 0.3s
+2025-10-02T04:02:00.1961757Z #7 extracting sha256:40e451c10b31532d8616ff155adb8383bcfe95b7388ad69363af6512986430f9 0.1s done
+2025-10-02T04:02:00.3456510Z #7 sha256:330457f0054be4c07fbaeac90483ac4f534113ccd944fe16beb9e079a3ab3a36 44.04MB / 60.05MB 0.5s
+2025-10-02T04:02:00.4845103Z #7 sha256:330457f0054be4c07fbaeac90483ac4f534113ccd944fe16beb9e079a3ab3a36 60.05MB / 60.05MB 0.6s done
+2025-10-02T04:02:00.6363439Z #7 extracting sha256:330457f0054be4c07fbaeac90483ac4f534113ccd944fe16beb9e079a3ab3a36
+2025-10-02T04:02:03.3491910Z #7 extracting sha256:330457f0054be4c07fbaeac90483ac4f534113ccd944fe16beb9e079a3ab3a36 2.9s done
+2025-10-02T04:02:03.3492726Z #7 DONE 3.6s
+2025-10-02T04:02:03.5075307Z 
+2025-10-02T04:02:03.5076432Z #7 [buildstage 1/3] FROM docker.io/library/golang:alpine@sha256:b6ed3fd0452c0e9bcdef5597f29cc1418f61672e9d3a2f55bf02e7222c014abd
+2025-10-02T04:02:03.5077427Z #7 extracting sha256:a47af78ce4e7644116937dd73c4624dd335cedafdcfbb998d89e8c4d7c652854 done
+2025-10-02T04:02:03.5078547Z #7 extracting sha256:4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1 done
+2025-10-02T04:02:03.5079024Z #7 DONE 3.6s
+2025-10-02T04:02:03.5079155Z 
+2025-10-02T04:02:03.5079273Z #10 [buildstage 2/3] WORKDIR /app
+2025-10-02T04:02:03.7927485Z #10 DONE 0.4s
+2025-10-02T04:02:03.8986038Z 
+2025-10-02T04:02:03.8987961Z #11 [buildstage 3/3] RUN --mount=type=cache,target=/go/pkg/mod     --mount=type=cache,target=/root/.cache/go-build     GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="-X 'main.version=1.0.26' -X 'main.commit=0053290bb9bb8e41c77c92cc7cc3bfa42f30580e'" -o configupdater ./cmd/configupdater/main.go
+2025-10-02T04:02:03.8990545Z #11 0.058 go: go.mod file not found in current directory or any parent directory; see 'go help modules'
+2025-10-02T04:02:03.8992666Z #11 ERROR: process "/bin/sh -c GOOS=${TARGETOS} GOARCH=${TARGETARCH} CGO_ENABLED=0 go build -ldflags=\"-X 'main.version=$VERSION' -X 'main.commit=$COMMIT_SHA'\" -o configupdater ./cmd/configupdater/main.go" did not complete successfully: exit code: 1
+2025-10-02T04:02:03.8993733Z ------
+2025-10-02T04:02:03.8995370Z  > [buildstage 3/3] RUN --mount=type=cache,target=/go/pkg/mod     --mount=type=cache,target=/root/.cache/go-build     GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="-X 'main.version=1.0.26' -X 'main.commit=0053290bb9bb8e41c77c92cc7cc3bfa42f30580e'" -o configupdater ./cmd/configupdater/main.go:
+2025-10-02T04:02:03.8997475Z 0.058 go: go.mod file not found in current directory or any parent directory; see 'go help modules'
+2025-10-02T04:02:03.8998189Z ------
+2025-10-02T04:02:03.9046388Z updater.Dockerfile:14
+2025-10-02T04:02:03.9046890Z --------------------
+2025-10-02T04:02:03.9047332Z   13 |     # Use mount cache for both go modules and build cache
+2025-10-02T04:02:03.9047892Z   14 | >>> RUN --mount=type=cache,target=/go/pkg/mod \
+2025-10-02T04:02:03.9048397Z   15 | >>>     --mount=type=cache,target=/root/.cache/go-build \
+2025-10-02T04:02:03.9049106Z   16 | >>>     GOOS=${TARGETOS} GOARCH=${TARGETARCH} CGO_ENABLED=0 go build -ldflags="-X 'main.version=$VERSION' -X 'main.commit=$COMMIT_SHA'" -o configupdater ./cmd/configupdater/main.go
+2025-10-02T04:02:03.9049714Z   17 |     
+2025-10-02T04:02:03.9050102Z --------------------
+2025-10-02T04:02:03.9050994Z ERROR: failed to build: failed to solve: process "/bin/sh -c GOOS=${TARGETOS} GOARCH=${TARGETARCH} CGO_ENABLED=0 go build -ldflags=\"-X 'main.version=$VERSION' -X 'main.commit=$COMMIT_SHA'\" -o configupdater ./cmd/configupdater/main.go" did not complete successfully: exit code: 1
+2025-10-02T04:02:03.9124018Z ##[error]buildx failed with: ERROR: failed to build: failed to solve: process "/bin/sh -c GOOS=${TARGETOS} GOARCH=${TARGETARCH} CGO_ENABLED=0 go build -ldflags=\"-X 'main.version=$VERSION' -X 'main.commit=$COMMIT_SHA'\" -o configupdater ./cmd/configupdater/main.go" did not complete successfully: exit code: 1
+2025-10-02T04:02:03.9248847Z Post job cleanup.
+2025-10-02T04:02:04.1415541Z ##[group]Removing temp folder /home/runner/work/_temp/docker-actions-toolkit-a1EViR
+2025-10-02T04:02:04.1425489Z ##[endgroup]
+2025-10-02T04:02:04.1426276Z ##[group]Post cache
+2025-10-02T04:02:04.1428386Z State not set
+2025-10-02T04:02:04.1429277Z ##[endgroup]
+2025-10-02T04:02:04.1552323Z Post job cleanup.
+2025-10-02T04:02:04.4592991Z [command]/usr/bin/docker logout ghcr.io
+2025-10-02T04:02:04.4724735Z Removing login credentials for ghcr.io
+2025-10-02T04:02:04.4763937Z ##[group]Post cache
+2025-10-02T04:02:04.4765872Z State not set
+2025-10-02T04:02:04.4767103Z ##[endgroup]
+2025-10-02T04:02:04.4888121Z Post job cleanup.
+2025-10-02T04:02:04.7761048Z ##[group]Removing builder
+2025-10-02T04:02:04.8778512Z [command]/usr/bin/docker buildx rm builder-cb815b28-96b7-4c68-bcf7-ca5c6f6ebc0e
+2025-10-02T04:02:05.4772654Z builder-cb815b28-96b7-4c68-bcf7-ca5c6f6ebc0e removed
+2025-10-02T04:02:05.4813859Z ##[endgroup]
+2025-10-02T04:02:05.4815872Z ##[group]Cleaning up certificates
+2025-10-02T04:02:05.4822716Z ##[endgroup]
+2025-10-02T04:02:05.4823843Z ##[group]Post cache
+2025-10-02T04:02:05.4825999Z State not set
+2025-10-02T04:02:05.4826719Z ##[endgroup]
+2025-10-02T04:02:05.4947406Z Post job cleanup.
+2025-10-02T04:02:05.5881952Z [command]/usr/bin/git version
+2025-10-02T04:02:05.5919069Z git version 2.51.0
+2025-10-02T04:02:05.5974112Z Temporarily overriding HOME='/home/runner/work/_temp/9307d64a-e25a-40ac-b24a-2fbcb4be4ebc' before making global git config changes
+2025-10-02T04:02:05.5975355Z Adding repository directory to the temporary git global config as a safe directory
+2025-10-02T04:02:05.5980049Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/km-agent/km-agent
+2025-10-02T04:02:05.6022589Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2025-10-02T04:02:05.6054435Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2025-10-02T04:02:05.6283265Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2025-10-02T04:02:05.6303779Z http.https://github.com/.extraheader
+2025-10-02T04:02:05.6316679Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2025-10-02T04:02:05.6346974Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2025-10-02T04:02:05.6671410Z Cleaning up orphan processes
