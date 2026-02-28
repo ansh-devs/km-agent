@@ -1,0 +1,38 @@
+name: Publish host agent image to the registry
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build_and_pub:
+    runs-on: ubuntu-latest
+    env:
+      GOPRIVATE: github.com/kloudmate/*
+    steps:
+      - name: Determine Version
+        id: get_version
+        run: |
+          VERSION_NUMBER=$(echo "${{ github.event.release.tag_name }}" | sed 's/^v//')
+          echo "Using release tag version: $VERSION_NUMBER"
+          echo "VERSION=$VERSION_NUMBER" >> $GITHUB_ENV
+
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Clone private ebpf module
+        run: |
+          git clone https://x-access-token:${{ secrets.GHCR_PAT }}@github.com/kloudmate/kloudmate-ebpf-programs.git /tmp/km-ebpf
+          cd /tmp/km-ebpf && make docker-generate
+
+      - name: Build & Push Image
+        run: |
+          docker login --username kloudmate --password ${{ secrets.GHCR_PAT }} ghcr.io
+          docker buildx build . \
+            --build-context km-ebpf=/tmp/km-ebpf \
+            --build-arg VERSION=${{ env.VERSION }} \
+            --tag ghcr.io/kloudmate/km-agent:${{ env.VERSION }} \
+            --tag ghcr.io/kloudmate/km-agent:latest \
+            --push
