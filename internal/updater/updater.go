@@ -96,6 +96,8 @@ func (u *ConfigUpdater) CheckForUpdates(ctx context.Context, p UpdateCheckerPara
 	// Add API key if configured
 	if u.cfg.APIKey != "" {
 		req.Header.Set("Authorization", u.cfg.APIKey)
+	} else {
+		panic(fmt.Sprintf("KM_API_KEY is not configured."))
 	}
 
 	resp, respErr := u.client.Do(req)

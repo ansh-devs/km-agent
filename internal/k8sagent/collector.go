@@ -15,7 +15,13 @@ func (a *K8sAgent) startInternalCollector() error {
 
 	a.Logger.Info("starting collector instance")
 
-	collectorSettings := shared.CollectorInfoFactory(a.otelConfigPath())
+	configPath := a.otelConfigPath()
+	enrichedPath, err := shared.EnrichCollectorConfig(configPath, a.Logger)
+	if err != nil {
+		a.Logger.Warnw("config enrichment failed, using original config", "error", err)
+		enrichedPath = configPath
+	}
+	collectorSettings := shared.CollectorInfoFactory(enrichedPath)
 	if a.Cfg.DeploymentMode == "DEPLOYMENT" {
 		factories, err := collectorSettings.Factories()
 		if err == nil {
@@ -46,7 +52,7 @@ func (a *K8sAgent) startInternalCollector() error {
 		defer a.wg.Done()
 
 		a.Logger.Infow("collector starting",
-			"configPath", a.otelConfigPath(),
+			"configPath", enrichedPath,
 			"deploymentMode", a.Cfg.DeploymentMode,
 		)
 
