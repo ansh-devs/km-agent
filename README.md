@@ -2,27 +2,29 @@
 
 ![KM-Agent Banner](docs/banner_km_agent.png)
 
-[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Go Version](https://img.shields.io/badge/Go-1.24.4+-blue.svg)](https://golang.org/)
+[![License: Apache-2.0](https://img.shields.io/badge/License-GNU%20GPL-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Go Version](https://img.shields.io/badge/Go-1.25.3+-blue.svg)](https://golang.org/)
 [![Release](https://img.shields.io/github/release/kloudmate/km-agent.svg)](https://github.com/kloudmate/km-agent/releases)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/kloudmate/km-agent/actions)
 
 [![GHCR Pulls](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fghcr-badge.elias.eu.org%2Fapi%2Fkloudmate%2Fkm-agent%2Fkm-kube-agent&query=downloadCount&style=flat&logo=docker&label=Image%20Pulls&color=2496ed)](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fghcr-badge.elias.eu.org%2Fapi%2Fkloudmate%2Fkm-agent%2Fkm-kube-agent&query=downloadCount&style=flat&logo=docker&label=Image%20Pulls&color=2496ed)
 
-**KloudMate Agent - A OpenTelemetry Collector Distribution**
+**KloudMate Agent — An OpenTelemetry Collector Distribution**
 
-*An OpenTelemetry Collector distribution with automated deployment, remote configuration, and auto-instrumentation support*
+*An OpenTelemetry Collector distribution with automated deployment, remote configuration, eBPF-powered zero-code observability, and auto-instrumentation support*
 </div>
 
 ## About
 
-**KM-Agent is an [OpenTelemetry Collector distribution](https://opentelemetry.io/docs/concepts/distributions/)** that extends the upstream OpenTelemetry Collector with additional capabilities for simplified deployment, remote configuration management, and automated instrumentation. It bundles a curated set of receivers, processors, exporters, and extensions optimized for observability in Kubernetes, Linux, Docker, and Windows environments.
+**KM-Agent is an [OpenTelemetry Collector distribution](https://opentelemetry.io/docs/concepts/distributions/)** that extends the upstream OpenTelemetry Collector with additional capabilities for simplified deployment, remote configuration management, automated instrumentation, and **eBPF-powered kernel-level observability**. We've bundled a curated set of components optimized for observability in Kubernetes, Linux, Docker, Windows environments, and even on Edge.
 
 ### Key Problems Solved
 
 - **Complex Configuration**: Eliminates the steep learning curve of OpenTelemetry Collector configuration
 - **Manual Installation**: Provides automated installation scripts for multiple environments
 - **Configuration Management**: Enables remote configuration through a web interface without SSH access
+- **Blind Spots in Observability**: Using eBPF get instant, zero-code visibility across all services — no SDK integration, no code changes, no restarts
+- **Database Visibility**: Built-in Database Activity Monitoring (DAM) captures SQL operations, latencies, and throughput at the kernel level
 
 ## Features
 
@@ -30,8 +32,11 @@
 - 🌐 **Remote Configuration**: Configure agents through a web interface without your target machine access
 - 📊 **Lifecycle Management**: Comprehensive management of OpenTelemetry Collector
 - 🔍 **Synthetic Monitoring**: Built-in health checks and monitoring capabilities
-- 🎯 **Multi-Platform Support**: Native support for various deployment environments
+- 🎯 **Multi-Platform Support**: Native support for various deployment environments (including ARM64)
 - 📈 **Real-time Dashboards**: Unique agent identification for centralized monitoring
+- 🐝 **eBPF-Powered Observability**: Kernel-level, zero-code instrumentation for instant application and network visibility
+- 🛢️ **Database Activity Monitoring (DAM)**: Automatic profiling of MySQL, PostgreSQL. Even messaging systems like Redis, Kafka etc.
+- ⚡ **Zero Downtime Instrumentation**: Observe all services without code changes or application restarts
 
 ### Supported OpenTelemetry Components
 
@@ -50,8 +55,10 @@ KM_API_KEY="<YOUR_API_KEY>" KM_COLLECTOR_ENDPOINT="https://otel.kloudmate.com:43
 ```
 
 #### Linux Installation
-Similar to native OTel agent, agent supports both debian and Red Hat based systems.
-User can install the agent via this automated bash script
+The agent supports both Debian and Red Hat based systems on **x86_64** and **ARM64 (aarch64)** architectures.
+Packages are available as `.deb` (Debian/Ubuntu) and `.rpm` (RHEL/CentOS/Fedora).
+
+Install the agent via the automated bash script:
 
 ```bash
 KM_API_KEY="<YOUR_API_KEY>" KM_COLLECTOR_ENDPOINT="https://otel.kloudmate.com:4318" bash -c "$(curl -L https://cdn.kloudmate.com/scripts/install_linux.sh)"
@@ -119,7 +126,7 @@ Download and run the Windows (.exe) installer from our [releases page](https://g
 ![Supported Environments](docs/environments.png)
 
 ### Current Support
-- ✅ **Linux** (Debian/Ubuntu, RHEL/CentOS)
+- ✅ **Linux** (Debian/Ubuntu, RHEL/CentOS) — x86_64 and ARM64 (aarch64)
 - ✅ **Docker** (Host metrics and log collection)
 - ✅ **Kubernetes** (via DaemonSet & Deployment)
 - ✅ **Windows** (Windows Server 2016+)
@@ -150,6 +157,103 @@ In future releases the agent can be installed in any of the following environmen
 * ECS
 * Azure k8s
 
+---
+
+## eBPF Receiver — Zero Downtime Observability
+
+The KM-Agent ships with a built-in **eBPF (Extended Berkeley Packet Filter) Receiver** that provides instant, out-of-the-box observability for your entire infrastructure and application stack — **without requiring code changes, manual configurations, or application restarts**.
+
+eBPF runs programs safely inside the Linux kernel, allowing the agent to observe the behaviour of the entire system and its applications dynamically at extremely low overhead.
+
+### What It Provides Out of the Box
+
+| Capability | Description |
+| :--- | :--- |
+| **Golden RED Metrics** | Automatic Request Rate, Error Rate, and Duration metrics. Protocols supported: HTTP/HTTP2, gRPC, MySQL, PostgreSQL, Redis, MongoDB, Kafka, Elasticsearch. |
+| **Auto-Distributed Tracing** | Automatically connects incoming requests to outgoing calls, generating fully compliant OpenTelemetry trace spans across microservices. |
+| **Service Metadata & Inventory** | Auto-detects application language, enriches data with Host IDs, Process IDs, Cloud Provider metadata, and Kubernetes attributes. |
+| **Zero-Code Network Observability** | Captures L3/L4 network flow metrics including bytes transferred, TCP retransmits, state changes, and packet drops between services. |
+
+### eBPF vs. Traditional OpenTelemetry
+
+| Feature | KM eBPF Receiver | Traditional OpenTelemetry |
+| :--- | :--- | :--- |
+| **Code Changes** | **None.** Deploy the agent to the node. | Requires SDK dependencies or attaching agents. |
+| **Application Restarts** | **No restarts required.** | Requires rolling restarts to inject instrumentation. |
+| **Setup Complexity** | **Low.** Single DaemonSet / VM process per host. | **High.** Per-service configuration, library updates. |
+| **Language Support** | **Universal.** Go, Rust, C++, Python, Java, Node.js, Ruby. | Requires per-language SDKs; compiled languages are difficult. |
+| **Performance Overhead** | **Extremely low.** Runs in kernel space. | Higher, especially with rich auto-instrumentation. |
+| **Missing Services** | Impossible — the kernel sees every packet. | Un-instrumented services remain blind spots. |
+
+> **💡 Recommended approach:** Start with the eBPF Receiver for instant, broad coverage, then strategically enrich with Traditional OpenTelemetry SDKs where you need custom business logic attributes.
+
+### Enabling the eBPF Receiver
+
+The eBPF Receiver is enabled through the agent's `config.yaml`. Below is a standard configuration:
+
+```yaml
+metrics:
+  features:
+    - application          # HTTP, gRPC, SQL operation metrics (RED metrics)
+    - application_span     # Trace spans for transactions
+    - network              # L3/L4 Network flow metrics
+
+discovery:
+  services:
+    - name: all-services
+      namespace: default
+      open_ports: '80, 443, 8080, 8443, 5432, 3306, 6379, 9092, 27017'
+
+network:
+  enable: true
+  source: tc
+  direction: both
+
+attributes:
+  kubernetes:
+    enable: true
+```
+
+#### Prerequisites
+- Linux kernel >= 5.8 (recommended; some features work on 4.18+)
+- Root privileges or `CAP_SYS_ADMIN` + `CAP_BPF` capabilities
+- In Kubernetes: RBAC permissions (Node, Pod, Service, ReplicaSet viewers)
+
+---
+
+## Database Activity Monitoring (DAM)
+
+The eBPF Receiver includes built-in **Database Activity Monitoring** that automatically profiles database traffic at the kernel level. No database-side agents or plugins needed.
+
+### Supported Databases
+| Database | Captured Metrics |
+| :--- | :--- |
+| **MySQL** | Query operations, latency (avg + P99), prepared statements, read/write ratio |
+| **PostgreSQL** | Query operations, latency (avg + P99), prepared statements, read/write ratio |
+
+| Messaging Systems | Captured Metrics |
+| :--- | :--- |
+| **Redis** | Command operations, latency, throughput |
+| **Kafka** | Producer/Consumer metrics, throughput |
+| **Elasticsearch** | Request operations, latency, throughput |
+
+### Key DAM Capabilities
+- **Table-level hotspot detection** — identify your most queried and slowest tables
+- **Read vs. Write ratio analysis** — understand workload characteristics per table
+- **P99 latency tracking** — surface tail latency issues before they impact users
+- **Zero configuration** — automatically detected via eBPF kernel hooks; no database credentials required
+
+Enable heuristic SQL detection and tune caches for high-load environments:
+
+```yaml
+ebpf:
+  heuristic_sql_detect: true
+  mysql_prepared_statements_cache_size: 1024
+  postgres_prepared_statements_cache_size: 1024
+```
+
+---
+
 <div align="center">
 
 ## Latest Enhancement to Your KloudMate Suite
@@ -158,47 +262,13 @@ In future releases the agent can be installed in any of the following environmen
 #### Click [here](https://templates.kloudmate.com) or the above image to see available templates
 </div>
 
-
-## Contributing
-
-![Contributions Welcome](docs/contributions.png)
-
-We welcome contributions that improve the quality, usability, and functionality of KM-Agent. Please read our contribution guidelines before getting started.
-
-### How to Contribute
-
-1. **Fork the Repository**
-   ```bash
-   git fork https://github.com/kloudmate/km-agent.git
-   ```
-
-2. **Create a Feature Branch**
-   ```bash
-   git checkout -b feature/amazing-feature
-   ```
-
-3. **Make Your Changes**
-   - Follow our [coding standards](CONTRIBUTING.md#coding-standards)
-   - Add tests for new functionality
-   - Update documentation as needed
-
-4. **Submit a Pull Request**
-   - Provide a clear description of your changes
-   - Include any relevant issue numbers
-   - Ensure all tests pass
-
 ### Reporting Issues
 
 Before creating an issue, please:
 
 - Check existing [issues](https://github.com/kloudmate/km-agent/issues)
-- Use our issue templates
 - Provide detailed reproduction steps
-- Include environment information
-
-### Code of Conduct
-
-This project adheres to the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code.
+- Include environment information(K8s version,VM host info, OS, etc.)
 
 ## Community and Support
 

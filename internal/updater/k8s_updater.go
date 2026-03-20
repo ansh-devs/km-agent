@@ -14,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kloudmate/km-agent/internal/clouddetect"
 	"github.com/kloudmate/km-agent/internal/config"
 	"github.com/kloudmate/km-agent/internal/instrumentation"
 	"github.com/kloudmate/km-agent/internal/version"
@@ -27,7 +28,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-// ConfigUpdater handles configuration updates from a remote API
+// K8sConfigUpdater handles configuration updates from a remote API
 type K8sConfigUpdater struct {
 	cfg         *config.K8sAgentConfig
 	logger      *zap.SugaredLogger
@@ -36,6 +37,7 @@ type K8sConfigUpdater struct {
 	logsEnabled bool
 	apmEnabled  bool
 	configPath  string
+	CloudEnv    *clouddetect.CloudEnvironment
 }
 
 type K8sUpdateCheckerParams struct {
@@ -271,6 +273,10 @@ func (a *K8sConfigUpdater) performConfigCheck(agentCtx context.Context) error {
 }
 
 func (a *K8sConfigUpdater) UpdateConfigMap(daemonSetConfig map[string]interface{}, deploymentConfig map[string]interface{}) error {
+	// Patch configs with cloud-specific resource detection before writing.
+	daemonSetConfig = clouddetect.PatchCollectorConfig(daemonSetConfig, a.CloudEnv)
+	deploymentConfig = clouddetect.PatchCollectorConfig(deploymentConfig, a.CloudEnv)
+
 	daemonSetYamlBytes, err := yaml.Marshal(daemonSetConfig)
 	if err != nil {
 		return fmt.Errorf("marshal error for DaemonSet otel-config: %w", err)

@@ -1,13 +1,14 @@
 package k8sagent
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strings"
 	"sync"
+	"time"
 
-	"context"
-
+	"github.com/kloudmate/km-agent/internal/clouddetect"
 	kmlogger "github.com/kloudmate/km-agent/internal/logger"
 	"github.com/kloudmate/km-agent/internal/version"
 	"go.opentelemetry.io/collector/otelcol"
@@ -31,6 +32,7 @@ type K8sAgent struct {
 	Logger    *zap.SugaredLogger
 	Collector *otelcol.Collector
 	K8sClient *kubernetes.Clientset
+	CloudEnv  *clouddetect.CloudEnvironment
 
 	collectorMu     sync.Mutex
 	wg              sync.WaitGroup
@@ -93,11 +95,16 @@ func (km *K8sAgent) StartAgent(ctx context.Context) error {
 		"commitSHA", km.AgentInfo.CommitSHA,
 		"collectorVersion", km.AgentInfo.CollectorVersion,
 	)
+	km.detectCloudEnvironment(ctx)
 	return km.Start(ctx)
 }
 
 // Start runs the agent with otel config from the default path.
 func (a *K8sAgent) Start(ctx context.Context) error {
+	// Patch the collector config with cloud-specific resource detection
+	if err := clouddetect.PatchCollectorConfigFile(a.otelConfigPath(), a.CloudEnv); err != nil {
+		a.Logger.Warnw("failed to patch collector config with cloud detectors, continuing with defaults", "error", err)
+	}
 	if err := a.startInternalCollector(); err != nil {
 		return fmt.Errorf("failed to start collector: %w", err)
 	}
@@ -165,6 +172,19 @@ func (c *K8sAgent) otelConfigPath() string {
 	} else {
 		return deploymentURI
 	}
+}
+
+// detectCloudEnvironment runs cloud provider detection and caches the result.
+func (a *K8sAgent) detectCloudEnvironment(ctx context.Context) {
+	detector := clouddetect.NewDetector(a.Logger)
+	detectCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+	a.CloudEnv = detector.Detect(detectCtx)
+	a.Logger.Infow("cloud detection complete",
+		"provider", a.CloudEnv.Provider,
+		"compute_type", a.CloudEnv.ComputeType,
+		"detectors", a.CloudEnv.RecommendedDetectors(),
+	)
 }
 
 // setEnvForAgentVersion sets agent version on env this gets later used by otel processor to inject agent version

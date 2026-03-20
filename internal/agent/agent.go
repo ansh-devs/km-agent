@@ -10,6 +10,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
+	"github.com/kloudmate/km-agent/internal/clouddetect"
 	"github.com/kloudmate/km-agent/internal/config"
 	"github.com/kloudmate/km-agent/internal/updater"
 	"go.opentelemetry.io/collector/otelcol"
@@ -22,6 +23,8 @@ type Agent struct {
 	logger         *zap.SugaredLogger
 	collector      *otelcol.Collector
 	updater        *updater.ConfigUpdater
+	cloudDetector  *clouddetect.Detector
+	cloudEnv       *clouddetect.CloudEnvironment
 	shutdownSignal chan struct{}
 	wg             sync.WaitGroup
 	collectorMu    sync.Mutex
@@ -68,6 +71,12 @@ func (a *Agent) StartAgent(ctx context.Context) error {
 			a.logger.Warn("Agent startup failed, reset running state")
 		}
 	}()
+	// Detect cloud environment once at startup.
+	a.detectCloudEnvironment(ctx)
+	// Patch the initial collector config with cloud-specific resource detection.
+	if err := a.patchCollectorConfig(); err != nil {
+		a.logger.Warnw("failed to patch collector config with cloud detectors, continuing with defaults", "error", err)
+	}
 
 	a.wg.Add(2)
 	go func() {
@@ -119,7 +128,7 @@ func (a *Agent) manageCollectorLifecycle(ctx context.Context) error {
 	}
 
 	// Create the collector instance.
-	collector, err := NewCollector(a.cfg)
+	collector, err := NewCollector(a.cfg, a.logger)
 	if err != nil {
 		return fmt.Errorf("failed to create new collector instance: %w", err)
 	}
@@ -176,6 +185,8 @@ func (a *Agent) stopCollectorInstance() {
 
 // UpdateConfig takes new config and create new otel config file and update existing config file.
 func (a *Agent) UpdateConfig(_ context.Context, newConfig map[string]interface{}) error {
+	// Patch the incoming config with cloud-specific resource detection processors before writing it to disk.
+	newConfig = clouddetect.PatchCollectorConfig(newConfig, a.cloudEnv)
 	configYAML, err := yaml.Marshal(newConfig)
 	if err != nil {
 		return fmt.Errorf("failed to marshal new config to YAML: %w", err)
@@ -227,6 +238,29 @@ func (a *Agent) runConfigUpdateChecker(ctx context.Context) {
 			return
 		}
 	}
+}
+
+// detectCloudEnvironment runs cloud provider detection and caches the result.
+func (a *Agent) detectCloudEnvironment(ctx context.Context) {
+	a.cloudDetector = clouddetect.NewDetector(a.logger)
+
+	detectCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+
+	a.cloudEnv = a.cloudDetector.Detect(detectCtx)
+	a.logger.Infow("cloud detection complete",
+		"provider", a.cloudEnv.Provider,
+		"compute_type", a.cloudEnv.ComputeType,
+		"detectors", a.cloudEnv.RecommendedDetectors(),
+	)
+}
+
+// patchCollectorConfig reads the collector YAML config, patches it with cloud-specific resource detection processors, and writes it back.
+func (a *Agent) patchCollectorConfig() error {
+	if a.cloudEnv == nil {
+		return nil
+	}
+	return clouddetect.PatchCollectorConfigFile(a.cfg.OtelConfigPath, a.cloudEnv)
 }
 
 // performConfigCheck checks remote server for new config and restart collector if required
