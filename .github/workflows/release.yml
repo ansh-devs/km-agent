@@ -34,11 +34,20 @@ jobs:
           VERSION_NUMBER=$(echo "${{ github.event.release.tag_name }}" | sed 's/^v//')
           echo "Using release tag version: $VERSION_NUMBER"
           echo "VERSION=$VERSION_NUMBER" >> $GITHUB_ENV
-      - name: Clone private ebpf module
+      - name: Configure Git for private repos
         if: matrix.target != 'windows'
+        run: git config --global url."https://x-access-token:${{ secrets.GHCR_PAT }}@github.com/".insteadOf "https://github.com/"
+      - name: Clone private modules
+        if: matrix.target != 'windows'
+        env:
+          GOPRIVATE: github.com/kloudmate/*
+          GONOSUMDB: github.com/kloudmate/*
         run: |
-          git clone https://x-access-token:${{ secrets.GHCR_PAT }}@github.com/kloudmate/kloudmate-ebpf-programs.git /tmp/km-ebpf
-          cd /tmp/km-ebpf && make docker-generate
+          sudo mkdir -p /build/modules
+          sudo chown -R $USER:$USER /build
+          git clone https://github.com/kloudmate/kloudmate-ebpf-programs.git /build/modules/km-ebpf
+          cd /build/modules/km-ebpf && make docker-generate
+          git clone https://github.com/kloudmate/ai-code.git /build/modules/km-classifier
       - name: Build Linux packages (amd64)
         if: matrix.target == 'linux-amd64'
         run: |

@@ -11,8 +11,6 @@ permissions:
 jobs:
   build_and_pub:
     runs-on: ${{ matrix.runner }}
-    env:
-      GOPRIVATE: github.com/kloudmate/*
     strategy:
       matrix:
         include:
@@ -40,10 +38,6 @@ jobs:
             type=semver,pattern={{version}}
             type=raw,value=latest,enable=${{ github.event.release.prerelease == false }}
             type=raw,value=dev,enable=${{ github.event.release.prerelease == true }}
-      - name: Clone private ebpf module
-        run: |
-          git clone https://x-access-token:${{ secrets.GHCR_PAT }}@github.com/kloudmate/kloudmate-ebpf-programs.git /tmp/km-ebpf
-          cd /tmp/km-ebpf && make docker-generate
       - name: Build and push Docker image by digest
         uses: docker/build-push-action@v5
         id: build
@@ -55,11 +49,10 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           outputs: type=image,name=ghcr.io/kloudmate/km-kube-agent,push-by-digest=true,name-canonical=true,push=true
-          build-contexts: |
-            km-ebpf=/tmp/km-ebpf
           build-args: |
             VERSION=${{ github.ref_name }}
             COMMIT_SHA=${{ github.sha }}
+            GITHUB_TOKEN=${{ secrets.GHCR_PAT }}
       - name: Export digest
         run: |
           mkdir -p /tmp/digests

@@ -7,7 +7,6 @@ import (
 	"github.com/kloudmate/km-agent/internal/config"
 	kmlogger "github.com/kloudmate/km-agent/internal/logger"
 	"github.com/kloudmate/km-agent/internal/updater"
-	"github.com/kloudmate/km-agent/rpc"
 	cli "github.com/urfave/cli/v2"
 	"github.com/urfave/cli/v2/altsrc"
 	"k8s.io/client-go/kubernetes"
@@ -31,7 +30,7 @@ func updaterFlags(cfg *config.K8sAgentConfig) []cli.Flag {
 		}),
 		altsrc.NewStringFlag(&cli.StringFlag{
 			Name:        "collector-endpoint",
-			Usage:       "OpenTelemetry exporter endpoint",
+			Usage:       "KloudMate collector endpoint",
 			Value:       "https://otel.kloudmate.com:4318",
 			EnvVars:     []string{"KM_COLLECTOR_ENDPOINT"},
 			Destination: &cfg.ExporterEndpoint,
@@ -108,7 +107,6 @@ func main() {
 						"version", version,
 						"commitSHA", commit,
 					)
-					go rpc.StartRpcServer()
 					logger.Info("loading in-cluster kubernetes config")
 					kubeconfig, err := rest.InClusterConfig()
 					if err != nil {

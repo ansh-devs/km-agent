@@ -17,7 +17,6 @@ import (
 	"github.com/kloudmate/km-agent/internal/config"
 	"github.com/kloudmate/km-agent/internal/instrumentation"
 	"github.com/kloudmate/km-agent/internal/version"
-	"github.com/kloudmate/km-agent/rpc"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"
 	corev1 "k8s.io/api/core/v1"
@@ -27,7 +26,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-// ConfigUpdater handles configuration updates from a remote API
+// K8sConfigUpdater handles configuration updates from a remote API
 type K8sConfigUpdater struct {
 	cfg         *config.K8sAgentConfig
 	logger      *zap.SugaredLogger
@@ -221,19 +220,8 @@ func (a *K8sConfigUpdater) performConfigCheck(agentCtx context.Context) error {
 
 	a.logger.Infoln("Checking for configuration updates...")
 	apmData := []APMConfig{}
-	results := rpc.GetDetectionResults()
-	a.logger.Infoln("available apps for instrumentation : %d", len(results))
-	for _, info := range results {
-		apmData = append(apmData, APMConfig{
-			Namespace:  info.Namespace,
-			Deployment: info.DeploymentName,
-			Kind:       info.Kind,
-			Language:   info.Language,
-			Enabled:    info.Enabled,
-		})
-	}
-	bites, _ := json.Marshal(apmData)
-	a.logger.Info(string(bites))
+	bytes, _ := json.Marshal(apmData)
+	a.logger.Info(string(bytes))
 	params := K8sUpdateCheckerParams{
 		Version:          a.cfg.Version,
 		CollectorVersion: version.GetCollectorVersion(),
