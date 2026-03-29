@@ -3,6 +3,7 @@
 package shared
 
 import (
+	km_classifier "components.kloudmate.com/processors/km_classifier"
 	ebpfreceiver "components.kloudmate.com/receiver/ebpfreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/cgroupruntimeextension"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/dockerstatsreceiver"
@@ -23,6 +24,7 @@ func Components() (otelcol.Factories, error) {
 
 	extensions = append(extensions, linuxExtensions()...)
 	receivers = append(receivers, linuxReceivers()...)
+	processors = append(processors, km_classifier.NewFactory())
 
 	return BuildFactories(extensions, receivers, exporters, processors, connectors)
 }

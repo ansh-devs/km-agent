@@ -3,14 +3,9 @@ module github.com/kloudmate/km-agent
 go 1.25.3
 
 require (
+	components.kloudmate.com/processors/km_classifier v0.0.0-00010101000000-000000000000
 	components.kloudmate.com/receiver/ebpfreceiver v0.0.0-00010101000000-000000000000
-	github.com/aws/aws-sdk-go-v2 v1.41.3
-	github.com/aws/aws-sdk-go-v2/config v1.32.3
-	github.com/aws/aws-sdk-go-v2/feature/rds/auth v1.6.19
-	github.com/aws/aws-sdk-go-v2/service/rds v1.116.2
-	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.41.3
 	github.com/kardianos/service v1.2.2
-	github.com/kloudmate/polylang-detector v0.0.0-20250823002422-a46aae1c5648
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/healthcheckextension v0.142.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage/filestorage v0.142.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/attributesprocessor v0.142.0
@@ -132,7 +127,9 @@ require (
 	github.com/armon/go-metrics v0.4.1 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
 	github.com/aws/aws-msk-iam-sasl-signer-go v1.0.4 // indirect
+	github.com/aws/aws-sdk-go-v2 v1.41.3 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.3 // indirect
+	github.com/aws/aws-sdk-go-v2/config v1.32.3 // indirect
 	github.com/aws/aws-sdk-go-v2/credentials v1.19.3 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.15 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.16.15 // indirect
@@ -157,15 +154,17 @@ require (
 	github.com/bboreham/go-loser v0.0.0-20230920113527-fcc2c21820a3 // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.9.1 // indirect
+	github.com/bytedance/sonic v1.14.0 // indirect
+	github.com/bytedance/sonic/loader v0.3.0 // indirect
 	github.com/caarlos0/env/v9 v9.0.0 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cilium/ebpf v0.20.0 // indirect
+	github.com/cloudwego/base64x v0.1.6 // indirect
 	github.com/cncf/xds/go v0.0.0-20251022180443-0feb69152e9f // indirect
 	github.com/containerd/containerd/api v1.9.0 // indirect
 	github.com/containerd/errdefs v1.0.0 // indirect
 	github.com/containerd/errdefs/pkg v0.3.0 // indirect
 	github.com/containerd/log v0.1.0 // indirect
-	github.com/containerd/stargz-snapshotter/estargz v0.16.3 // indirect
 	github.com/containerd/ttrpc v1.2.7 // indirect
 	github.com/containerd/typeurl/v2 v2.2.3 // indirect
 	github.com/containers/common v0.64.2 // indirect
@@ -178,10 +177,7 @@ require (
 	github.com/digitalocean/go-metadata v0.0.0-20250129100319-e3650a3df44b // indirect
 	github.com/digitalocean/godo v1.168.0 // indirect
 	github.com/distribution/reference v0.6.0 // indirect
-	github.com/docker/cli v28.2.2+incompatible // indirect
-	github.com/docker/distribution v2.8.3+incompatible // indirect
 	github.com/docker/docker v28.5.2+incompatible // indirect
-	github.com/docker/docker-credential-helpers v0.9.3 // indirect
 	github.com/docker/go-connections v0.6.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
@@ -244,7 +240,6 @@ require (
 	github.com/google/flatbuffers v25.2.10+incompatible // indirect
 	github.com/google/gnostic-models v0.7.1 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
-	github.com/google/go-containerregistry v0.20.6 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/go-tpm v0.9.8 // indirect
 	github.com/google/s2a-go v0.1.9 // indirect
@@ -312,13 +307,11 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.1-0.20231216201459-8508981c8b6c // indirect
 	github.com/moby/docker-image-spec v1.3.1 // indirect
-	github.com/moby/spdystream v0.5.0 // indirect
 	github.com/moby/sys/mountinfo v0.7.2 // indirect
 	github.com/moby/sys/userns v0.1.0 // indirect
 	github.com/mongodb-forks/digest v1.1.0 // indirect
 	github.com/mtibben/percent v0.2.1 // indirect
 	github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f // indirect
-	github.com/mxk/go-flowrate v0.0.0-20140419014527-cca7078d478f // indirect
 	github.com/netsampler/goflow2/v2 v2.2.3 // indirect
 	github.com/nginx/nginx-prometheus-exporter v1.4.1 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
@@ -398,6 +391,7 @@ require (
 	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/tilinna/clock v1.1.0 // indirect
 	github.com/tinylib/msgp v1.6.1 // indirect
+	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/twmb/franz-go v1.20.5 // indirect
 	github.com/twmb/franz-go/pkg/kadm v1.17.1 // indirect
 	github.com/twmb/franz-go/pkg/kmsg v1.12.0 // indirect
@@ -406,7 +400,6 @@ require (
 	github.com/twmb/murmur3 v1.1.8 // indirect
 	github.com/ua-parser/uap-go v0.0.0-20240611065828-3a4781585db6 // indirect
 	github.com/valyala/fastjson v1.6.4 // indirect
-	github.com/vbatts/tar-split v0.12.1 // indirect
 	github.com/vektah/gqlparser/v2 v2.5.31 // indirect
 	github.com/vishvananda/netlink v1.3.1 // indirect
 	github.com/vishvananda/netns v0.0.5 // indirect
@@ -557,7 +550,7 @@ require (
 	go.opentelemetry.io/collector/config/configtelemetry v0.143.0 // indirect
 	go.opentelemetry.io/collector/config/configtls v1.49.0 // indirect
 	go.opentelemetry.io/collector/connector/connectortest v0.142.0 // indirect
-	go.opentelemetry.io/collector/consumer v1.49.0
+	go.opentelemetry.io/collector/consumer v1.49.0 // indirect
 	go.opentelemetry.io/collector/consumer/consumererror v0.143.0 // indirect
 	go.opentelemetry.io/collector/consumer/consumertest v0.143.0 // indirect
 	go.opentelemetry.io/collector/exporter/exportertest v0.143.0 // indirect
@@ -566,7 +559,7 @@ require (
 	go.opentelemetry.io/collector/internal/fanoutconsumer v0.142.0 // indirect
 	go.opentelemetry.io/collector/internal/memorylimiter v0.142.0 // indirect
 	go.opentelemetry.io/collector/internal/sharedcomponent v0.142.0 // indirect
-	go.opentelemetry.io/collector/pdata v1.49.0
+	go.opentelemetry.io/collector/pdata v1.49.0 // indirect
 	go.opentelemetry.io/collector/pdata/testdata v0.143.0 // indirect
 	go.opentelemetry.io/collector/pipeline v1.49.0 // indirect
 	go.opentelemetry.io/collector/processor/processortest v0.142.0 // indirect
@@ -617,4 +610,4 @@ replace components.kloudmate.com/receiver/ebpfreceiver => /build/modules/km-ebpf
 
 replace go.opentelemetry.io/obi => /build/modules/km-ebpf
 
-replace github.com/kloudmate/ai-code/km_classifier_processor => /build/modules/km-classifier/km_classifier_processor
+replace components.kloudmate.com/processors/km_classifier => /build/modules/km-classifier/km_classifier_processor
