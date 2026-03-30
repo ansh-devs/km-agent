@@ -7,8 +7,6 @@ on:
 jobs:
   build_and_pub:
     runs-on: ubuntu-latest
-    env:
-      GOPRIVATE: github.com/kloudmate/*
     steps:
       - name: Determine Version
         id: get_version
@@ -22,17 +20,12 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Clone private ebpf module
-        run: |
-          git clone https://x-access-token:${{ secrets.GHCR_PAT }}@github.com/kloudmate/kloudmate-ebpf-programs.git /tmp/km-ebpf
-          cd /tmp/km-ebpf && make docker-generate
-
       - name: Build & Push Image
         run: |
           docker login --username kloudmate --password ${{ secrets.GHCR_PAT }} ghcr.io
           docker buildx build . \
-            --build-context km-ebpf=/tmp/km-ebpf \
             --build-arg VERSION=${{ env.VERSION }} \
+            --build-arg GITHUB_TOKEN=${{ secrets.GHCR_PAT }} \
             --tag ghcr.io/kloudmate/km-agent:${{ env.VERSION }} \
             --tag ghcr.io/kloudmate/km-agent:latest \
             --push

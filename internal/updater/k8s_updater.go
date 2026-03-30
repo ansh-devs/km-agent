@@ -14,11 +14,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kloudmate/km-agent/internal/clouddetect"
 	"github.com/kloudmate/km-agent/internal/config"
 	"github.com/kloudmate/km-agent/internal/instrumentation"
 	"github.com/kloudmate/km-agent/internal/version"
-	"github.com/kloudmate/km-agent/rpc"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"
 	corev1 "k8s.io/api/core/v1"
@@ -37,7 +35,6 @@ type K8sConfigUpdater struct {
 	logsEnabled bool
 	apmEnabled  bool
 	configPath  string
-	CloudEnv    *clouddetect.CloudEnvironment
 }
 
 type K8sUpdateCheckerParams struct {
@@ -223,19 +220,8 @@ func (a *K8sConfigUpdater) performConfigCheck(agentCtx context.Context) error {
 
 	a.logger.Infoln("Checking for configuration updates...")
 	apmData := []APMConfig{}
-	results := rpc.GetDetectionResults()
-	a.logger.Infoln("available apps for instrumentation : %d", len(results))
-	for _, info := range results {
-		apmData = append(apmData, APMConfig{
-			Namespace:  info.Namespace,
-			Deployment: info.DeploymentName,
-			Kind:       info.Kind,
-			Language:   info.Language,
-			Enabled:    info.Enabled,
-		})
-	}
-	bites, _ := json.Marshal(apmData)
-	a.logger.Info(string(bites))
+	bytes, _ := json.Marshal(apmData)
+	a.logger.Info(string(bytes))
 	params := K8sUpdateCheckerParams{
 		Version:          a.cfg.Version,
 		CollectorVersion: version.GetCollectorVersion(),
@@ -273,10 +259,6 @@ func (a *K8sConfigUpdater) performConfigCheck(agentCtx context.Context) error {
 }
 
 func (a *K8sConfigUpdater) UpdateConfigMap(daemonSetConfig map[string]interface{}, deploymentConfig map[string]interface{}) error {
-	// Patch configs with cloud-specific resource detection before writing.
-	daemonSetConfig = clouddetect.PatchCollectorConfig(daemonSetConfig, a.CloudEnv)
-	deploymentConfig = clouddetect.PatchCollectorConfig(deploymentConfig, a.CloudEnv)
-
 	daemonSetYamlBytes, err := yaml.Marshal(daemonSetConfig)
 	if err != nil {
 		return fmt.Errorf("marshal error for DaemonSet otel-config: %w", err)
