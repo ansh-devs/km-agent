@@ -1,12 +1,12 @@
 FROM golang:alpine AS buildstage
 ARG TARGETARCH
 ARG TARGETOS=linux
-ARG GITHUB_TOKEN
+ARG GHCR_PAT
 ENV GOPRIVATE=github.com/kloudmate/*
 ENV GONOSUMDB=github.com/kloudmate/*
 
-RUN apk add --no-cache git make
-RUN git config --global url."https://${GITHUB_TOKEN}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+RUN apk add --no-cache git make bash
+RUN git config --global url."https://${GHCR_PAT}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
 
 # Clone private modules into /build/modules
 RUN mkdir -p /build/modules && \

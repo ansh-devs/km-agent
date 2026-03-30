@@ -52,7 +52,7 @@ jobs:
           build-args: |
             VERSION=${{ github.ref_name }}
             COMMIT_SHA=${{ github.sha }}
-            GITHUB_TOKEN=${{ secrets.GHCR_PAT }}
+            GHCR_PAT=${{ secrets.GHCR_PAT }}
       - name: Export digest
         run: |
           mkdir -p /tmp/digests
