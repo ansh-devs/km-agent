@@ -1,11 +1,11 @@
 FROM golang:1.25.3-alpine3.22 AS buildstage
 
 # Accept GitHub token at build time for private repo access
-ARG GITHUB_TOKEN
+ARG GHCR_PAT
 ENV GOPRIVATE=github.com/kloudmate/*
 ENV GONOSUMDB=github.com/kloudmate/*
-RUN apk add --no-cache git make
-RUN git config --global url."https://${GITHUB_TOKEN}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+RUN apk add --no-cache git make bash
+RUN git config --global url."https://${GHCR_PAT}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
 RUN mkdir -p /build/modules && \
     git clone https://github.com/kloudmate/kloudmate-ebpf-programs.git /build/modules/km-ebpf && \
     cd /build/modules/km-ebpf && make docker-generate
