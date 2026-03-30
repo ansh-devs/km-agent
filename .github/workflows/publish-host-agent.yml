@@ -21,6 +21,15 @@ jobs:
 
       - uses: actions/checkout@v4
 
+      - name: Configure Git for private repos
+        run: git config --global url."https://${{ secrets.GHCR_PAT }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+
+      - name: Clone and generate eBPF modules
+        run: |
+          mkdir -p build-modules/km-ebpf
+          git clone https://github.com/kloudmate/kloudmate-ebpf-programs.git build-modules/km-ebpf
+          cd build-modules/km-ebpf && make docker-generate
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 

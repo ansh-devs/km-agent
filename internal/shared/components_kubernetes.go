@@ -3,6 +3,7 @@
 package shared
 
 import (
+	km_classifier "components.kloudmate.com/processors/km_classifier"
 	ebpfreceiver "components.kloudmate.com/receiver/ebpfreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/cgroupruntimeextension"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/k8sattributesprocessor"
@@ -58,5 +59,6 @@ func kubernetesReceivers() []receiver.Factory {
 func kubernetesProcessors() []processor.Factory {
 	return []processor.Factory{
 		k8sattributesprocessor.NewFactory(),
+		km_classifier.NewFactory(),
 	}
 }
