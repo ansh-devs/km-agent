@@ -610,4 +610,4 @@ replace components.kloudmate.com/receiver/ebpfreceiver => /build/modules/km-ebpf
 
 replace go.opentelemetry.io/obi => /build/modules/km-ebpf
 
-replace components.kloudmate.com/processors/km_classifier => /build/modules/km-classifier/km_classifier_processor
+replace components.kloudmate.com/processors/km_classifier => github.com/kloudmate/ai-code/km_classifier_processor v1.0.0
