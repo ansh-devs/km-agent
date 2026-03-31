@@ -73,6 +73,7 @@ KloudMate Agent has been successfully deployed to your cluster.
 
 📖 NEXT STEPS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Visit https://charts.kloudmate.com/docs for agent configuration
 
 1. The agent will automatically start collecting telemetry data from your cluster
 2. Data will be visible on your KloudMate dashboard shortly.

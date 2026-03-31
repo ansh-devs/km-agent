@@ -108,3 +108,4 @@ eval docker run -d \
   $IMAGE_NAME
 
 echo "🎉 Setup complete! 'km-agent' is now running."
+echo "visit https://charts.kloudmate.com/docs for agent configuration"

@@ -99,7 +99,7 @@ jobs:
           cp ../${{ steps.package.outputs.PACKAGE_NAME }} .
           RELEASE_URL="https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}"
 
-          helm repo index . --url "$RELEASE_URL"
+          helm repo index . --url "$RELEASE_URL" --merge index.yaml
           rm -rf ./${{ steps.package.outputs.PACKAGE_NAME }}
 
           git add index.yaml
