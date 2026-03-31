@@ -123,4 +123,5 @@ echo "👉 To check status: sudo systemctl status kmagent"
 echo " "
 echo "🐛 Found a bug? Report to: support@kloudmate.com"
 echo "   GitHub Issues: https://github.com/kloudmate/km-agent/issues"
+echo "visit https://charts.kloudmate.com/docs for agent configuration"
 exit 0
