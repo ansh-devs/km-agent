@@ -27,7 +27,8 @@ jobs:
         if: matrix.target != 'windows'
         run: |
           sudo apt-get update
-          sudo apt-get install -y rpm
+          sudo apt-get install -y rpm expect
+          sudo apt-get install -y rpm-sign
       - name: Determine Version
         id: get_version
         run: |
@@ -58,6 +59,22 @@ jobs:
         run: |
           make VERSION=${{ env.VERSION }} GOARCH=arm64 package-linux-deb
           make VERSION=${{ env.VERSION }} GOARCH=arm64 package-linux-rpm
+      - name: Import GPG Key for Signing
+        if: matrix.target != 'windows'
+        run: |
+          echo "${{ secrets.RPM_GPG_PRIVATE_KEY }}" | gpg --batch --import
+      - name: Sign Linux RPM packages
+        if: matrix.target != 'windows'
+        run: |
+          chmod +x scripts/sign_rpm.exp
+          for rpm in dist/rpm-*/RPMS/*/*.rpm; do
+            if [ -f "$rpm" ]; then
+              echo "Signing $rpm..."
+              ./scripts/sign_rpm.exp "$rpm" "amitava@kloudmate.com" "${{ secrets.RPM_GPG_PASSPHRASE }}"
+              # Verify signature
+              rpm --checksig "$rpm"
+            fi
+          done
       - name: Build Windows Installer package (using Docker via make)
         if: matrix.target == 'windows'
         run: make VERSION=${{ env.VERSION }} package-windows

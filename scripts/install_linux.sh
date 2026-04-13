@@ -110,6 +110,8 @@ if [ "$PKG" = "deb" ]; then
     sudo apt-get install -f -y
   fi
 elif [ "$PKG" = "rpm" ]; then
+  echo "🔑 Importing KloudMate GPG Key..."
+  sudo rpm --import https://charts.kloudmate.com/RPM-GPG-KEY-kloudmate || echo "⚠️  Warning: Failed to import GPG key."
   sudo KM_API_KEY="$KM_API_KEY" KM_COLLECTOR_ENDPOINT="$KM_COLLECTOR_ENDPOINT" $INSTALL_CMD "$TMP_PACKAGE"
 fi
 
