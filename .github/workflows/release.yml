@@ -47,7 +47,8 @@ jobs:
           sudo chown -R $USER:$USER /build
           git clone https://github.com/kloudmate/kloudmate-ebpf-programs.git /build/modules/km-ebpf
           cd /build/modules/km-ebpf && make docker-generate
-          git clone https://github.com/kloudmate/ai-code.git /build/modules/km-classifier
+          cd ${{ github.workspace }}
+          go mod tidy
       - name: Build Linux packages (amd64)
         if: matrix.target == 'linux-amd64'
         run: |

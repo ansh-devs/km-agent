@@ -1,4 +1,4 @@
-FROM golang:alpine AS buildstage
+FROM golang:1.25.8-alpine3.22 AS buildstage
 ARG TARGETARCH
 ARG TARGETOS=linux
 ARG GHCR_PAT
@@ -15,6 +15,7 @@ COPY go.mod go.sum ./
 COPY . .
 ARG VERSION=dev
 ARG COMMIT_SHA=unknown
+RUN go mod tidy
 RUN --mount=type=cache,target=/root/.cache/go-build \
     GOOS=${TARGETOS} GOARCH=${TARGETARCH} CGO_ENABLED=0 go build -tags kubernetes -ldflags="-w -s -X 'main.version=$VERSION' -X 'main.commit=$COMMIT_SHA'" -o kmagent ./cmd/kubeagent/main.go
 

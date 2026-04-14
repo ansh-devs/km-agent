@@ -1,4 +1,4 @@
-FROM golang:1.25.3-alpine3.22 AS buildstage
+FROM golang:1.25.8-alpine3.22 AS buildstage
 
 # Accept GitHub token at build time for private repo access
 ARG GHCR_PAT
@@ -14,6 +14,7 @@ WORKDIR /app
 COPY go.mod go.sum ./
 COPY . .
 ARG VERSION=dev
+RUN go mod tidy
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
     go build -a -tags linux -ldflags "-w -s -X 'main.version=${VERSION}'" -o /kmagent ./cmd/kmagent/...
 
