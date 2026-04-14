@@ -28,6 +28,6 @@ dependencies:
     repository: https://charts.jetstack.io
     condition: cert-manager.enabled
   - name: opentelemetry-operator
-    version: 0.90.0
+    version: 0.109.0
     repository: https://open-telemetry.github.io/opentelemetry-helm-charts
     condition: opentelemetry-operator.enabled
