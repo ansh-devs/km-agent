@@ -2,6 +2,7 @@ FROM golang:1.25.8-alpine3.22 AS buildstage
 ARG TARGETARCH
 ARG TARGETOS=linux
 WORKDIR /app
+RUN apk add --no-cache git
 COPY go.mod go.sum ./
 COPY . .
 
