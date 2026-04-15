@@ -59,6 +59,9 @@ jobs:
         run: |
           make VERSION=${{ env.VERSION }} GOARCH=arm64 package-linux-deb
           make VERSION=${{ env.VERSION }} GOARCH=arm64 package-linux-rpm
+      - name: Reclaim ownership of build artifacts
+        if: matrix.target != 'windows'
+        run: sudo chown -R $USER:$USER dist/
       - name: Import GPG Key for Signing
         if: matrix.target != 'windows'
         run: |

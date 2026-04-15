@@ -2,6 +2,7 @@
 %define scriptdir %{_libexecdir}/%{appname}
 %define confdir /etc/%{appname}
 %global _unitdir /usr/lib/systemd/system
+%define _binary_payload w9.gzdio
 
 Name: %{appname}
 Version: %{version}
