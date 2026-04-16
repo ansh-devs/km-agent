@@ -25,7 +25,7 @@ jobs:
         if: matrix.target != 'windows'
         run: |
           sudo apt-get update
-          sudo apt-get install -y rpm expect
+          sudo apt-get install -y rpm expect pinentry-tty
       - name: Determine Version
         id: get_version
         run: |
@@ -66,6 +66,7 @@ jobs:
           mkdir -p ~/.gnupg
           chmod 700 ~/.gnupg
           echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
+          echo "pinentry-program /usr/bin/pinentry-tty" >> ~/.gnupg/gpg-agent.conf
           gpgconf --kill gpg-agent
           echo "${{ secrets.RPM_GPG_PRIVATE_KEY }}" | gpg --batch --import
       - name: Sign Linux RPM packages
