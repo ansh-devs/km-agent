@@ -68,16 +68,12 @@ jobs:
           mkdir -p ~/.gnupg
           chmod 700 ~/.gnupg
           echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
-          echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
           gpgconf --kill gpg-agent
           echo "${{ secrets.RPM_GPG_PRIVATE_KEY }}" | gpg --batch --import
       - name: Sign Linux RPM packages
         if: matrix.target != 'windows'
         run: |
           chmod +x scripts/sign_rpm.exp
-          export TERM=xterm
-          export GPG_AGENT_INFO=""
-          gpgconf --kill gpg-agent 2>/dev/null || true
           for rpm in dist/rpm-*/RPMS/*/*.rpm; do
             if [ -f "$rpm" ]; then
               echo "Signing $rpm..."
