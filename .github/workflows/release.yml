@@ -66,12 +66,10 @@ jobs:
           mkdir -p ~/.gnupg
           chmod 700 ~/.gnupg
           echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
-          gpgconf --kill gpg-agent
-          gpg-agent --daemon --batch
-          sleep 1
-          AGENT_SOCKET=$(find ~/.gnupg -name "S.gpg-agent*" 2>/dev/null | head -1)
-          AGENT_PID=$(pgrep gpg-agent 2>/dev/null || echo "1")
-          export GPG_AGENT_INFO="$AGENT_SOCKET:$AGENT_PID:1"
+          gpgconf --kill gpg-agent 2>/dev/null || true
+          killall gpg-agent 2>/dev/null || true
+          sleep 2
+          eval $(gpg-agent --daemon --sh)
           echo "${{ secrets.RPM_GPG_PRIVATE_KEY }}" | gpg --batch --import
           KEYGRIP=$(gpg --list-secret-keys --with-keygrip "amitava@kloudmate.com" 2>/dev/null | grep "Keygrip" | head -1 | awk '{print $NF}')
           if [ -n "$KEYGRIP" ]; then
