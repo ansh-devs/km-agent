@@ -63,16 +63,18 @@ jobs:
       - name: Import GPG Key for Signing
         if: matrix.target != 'windows'
         run: |
-          mkdir -p ~/.gnupg
-          chmod 700 ~/.gnupg
-          echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
-          echo -n "${{ secrets.RPM_GPG_PASSPHRASE }}" > ~/.gnupg/passphrase
-          chmod 600 ~/.gnupg/passphrase
-          echo "passphrase-file ~/.gnupg/passphrase" >> ~/.gnupg/gpg.conf
-          echo "${{ secrets.RPM_GPG_PRIVATE_KEY }}" | gpg --batch --import
+          GNUPGHOME=/home/runner/.gnupg
+          mkdir -p $GNUPGHOME
+          chmod 700 $GNUPGHOME
+          echo "allow-loopback-pinentry" >> $GNUPGHOME/gpg-agent.conf
+          echo -n "${{ secrets.RPM_GPG_PASSPHRASE }}" > $GNUPGHOME/passphrase
+          chmod 600 $GNUPGHOME/passphrase
+          echo "passphrase-file $GNUPGHOME/passphrase" >> $GNUPGHOME/gpg.conf
+          echo "${{ secrets.RPM_GPG_PRIVATE_KEY }}" | GNUPGHOME=$GNUPGHOME gpg --batch --import
       - name: Sign Linux RPM packages
         if: matrix.target != 'windows'
         run: |
+          export GNUPGHOME=/home/runner/.gnupg
           export GPG_TTY=/dev/null
           for rpm in dist/rpm-*/RPMS/*/*.rpm; do
             if [ -f "$rpm" ]; then
