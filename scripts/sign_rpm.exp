@@ -10,7 +10,11 @@ set env(PINENTRY_MODE) loopback
 spawn bash -c "rpm --define \"_gpg_name $gpg_name\" --resign $rpm_file"
 
 expect {
-    -nocase "passphrase" {
+    -re "Enter.*phrase" {
+        send "$passphrase\r"
+        exp_continue
+    }
+    -re "pass.*phrase" {
         send "$passphrase\r"
         exp_continue
     }
