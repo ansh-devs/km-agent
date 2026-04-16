@@ -70,13 +70,9 @@ jobs:
           chmod 600 $GNUPGHOME/passphrase
           printf 'no-tty\nbatch\nuse-agent\npinentry-mode loopback\npassphrase-file %s/passphrase\n' "$GNUPGHOME" > $GNUPGHOME/gpg.conf
           echo "${{ secrets.RPM_GPG_PRIVATE_KEY }}" | GNUPGHOME=$GNUPGHOME gpg --batch --import
-          GNUPGHOME=$GNUPGHOME gpg --export "amitava@kloudmate.com" | sudo rpm --import -
-          echo "=== GPG conf ==="
-          cat $GNUPGHOME/gpg.conf
-          echo "=== Passphrase file exists ==="
-          ls -la $GNUPGHOME/passphrase
-          echo "=== Test GPG signing ==="
-          echo "test" | GNUPGHOME=$GNUPGHOME gpg --batch --no-tty --pinentry-mode loopback --passphrase-file $GNUPGHOME/passphrase --armor --sign -u "amitava@kloudmate.com" 2>&1 || echo "GPG sign test failed"
+          GNUPGHOME=$GNUPGHOME gpg --export "amitava@kloudmate.com" > /tmp/gpg-public-key.gpg
+          sudo rpm --import /tmp/gpg-public-key.gpg
+          rm /tmp/gpg-public-key.gpg
       - name: Sign Linux RPM packages
         if: matrix.target != 'windows'
         run: |
@@ -89,8 +85,8 @@ jobs:
               rpm --define "_gpg_name amitava@kloudmate.com" \
                   --define "_gpg_passphrase_file /home/runner/.gnupg/passphrase" \
                   --define "_gpg_sign_cmd %%{__gpg} gpg --batch --no-tty --pinentry-mode loopback --passphrase-file /home/runner/.gnupg/passphrase --sign --armor --detach-sign --local-user %%{_gpg_name}" \
-                  --resign "$rpm" 2>&1
-              rpm --checksig -v "$rpm" 2>&1
+                  --resign "$rpm"
+              rpm --checksig "$rpm"
             fi
           done
       - name: Build Windows Installer package (using Docker via make)
