@@ -66,19 +66,10 @@ jobs:
           mkdir -p ~/.gnupg
           chmod 700 ~/.gnupg
           echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
-          gpgconf --kill gpg-agent 2>/dev/null || true
-          killall gpg-agent 2>/dev/null || true
-          sleep 1
-          eval $(gpg-agent --daemon --sh)
-          sleep 1
+          echo -n "${{ secrets.RPM_GPG_PASSPHRASE }}" > ~/.gnupg/passphrase
+          chmod 600 ~/.gnupg/passphrase
+          echo "passphrase-file ~/.gnupg/passphrase" >> ~/.gnupg/gpg.conf
           echo "${{ secrets.RPM_GPG_PRIVATE_KEY }}" | gpg --batch --import
-          KEYGRIP=$(gpg --list-secret-keys --with-keygrip "amitava@kloudmate.com" 2>/dev/null | grep "Keygrip" | head -1 | awk '{print $NF}')
-          if [ -n "$KEYGRIP" ]; then
-            echo "${{ secrets.RPM_GPG_PASSPHRASE }}" | gpg-preset-passphrase --preset --passphrase-fd 0 "$KEYGRIP"
-            echo "Passphrase cached for key: $KEYGRIP"
-          else
-            echo "Warning: Could not find keygrip"
-          fi
       - name: Sign Linux RPM packages
         if: matrix.target != 'windows'
         run: |
