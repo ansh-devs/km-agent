@@ -1,427 +1,14 @@
-exporters:
-  otlphttp:
-    endpoint: ${env:KM_COLLECTOR_ENDPOINT}
-    headers:
-      Authorization: ${env:KM_API_KEY}
+---
 extensions:
   health_check:
     endpoint: 0.0.0.0:13133
-processors:
-  attributes/metrics:
-    actions:
-      - key: k8s.cluster.name
-        value: ${env:KM_CLUSTER_NAME}
-        action: insert
-  attributes/logs:
-    actions:
-      - key: k8s.cluster.name
-        from_attribute: k8s.cluster.name
-        action: upsert
-      - key: k8s.namespace.name
-        from_attribute: k8s.namespace.name
-        action: upsert
-      - key: k8s.deployment.name
-        from_attribute: k8s.deployment.name
-        action: upsert
-      - key: k8s.node.name
-        from_attribute: k8s.node.name
-        action: upsert
-      - key: k8s.pod.name
-        from_attribute: k8s.pod.name
-        action: upsert
-      - key: service.namespace
-        from_attribute: k8s.namespace.name
-        action: upsert
-      - key: service.instance.id
-        from_attribute: k8s.pod.uid
-        action: upsert
-      - key: k8s.container.name
-        from_attribute: k8s.container.name
-        action: upsert
-      - key: k8s.container.image.name
-        from_attribute: k8s.container.image.name
-        action: upsert
-      - key: k8s.container.image.tag
-        from_attribute: k8s.container.image.tag
-        action: upsert
-  batch:
-    send_batch_size: 10000
-    timeout: 10s
-  cumulativetodelta:
-
-    include:
-      match_type: strict
-      metrics:
-        - system.network.io
-        - system.disk.io
-        - system.disk.operations.rate
-        - system.network.packets.rate
-        - system.network.errors.rate
-        - system.network.dropped.rate
-        - k8s.pod.network.io.rate
-        - k8s.pod.network.errors.rate
-        - k8s.node.network.io.rate
-        - k8s.node.network.errors.rate
-  deltatorate:
-    metrics:
-      - system.network.io
-      - system.disk.io
-      - system.disk.operations.rate
-      - system.network.packets.rate
-      - system.network.errors.rate
-      - system.network.dropped.rate
-      - k8s.pod.network.io.rate
-      - k8s.pod.network.errors.rate
-      - k8s.node.network.io.rate
-      - k8s.node.network.errors.rate
-  groupbyattrs/filelog:
-    keys:
-      - k8s.pod.uid
-  k8sattributes:
-    auth_type: serviceAccount
-    passthrough: false
-    filter:
-      node_from_env_var: KM_NODE_NAME
-    extract:
-      metadata:
-        - k8s.pod.name
-        - k8s.pod.uid
-        - k8s.deployment.name
-        - k8s.namespace.name
-        - k8s.node.name
-        - k8s.pod.start_time
-        - k8s.statefulset.uid
-        - k8s.replicaset.uid
-        - k8s.daemonset.uid
-        - k8s.deployment.uid
-        - k8s.job.uid
-        - k8s.pod.ip
-        - k8s.daemonset.name
-        - k8s.statefulset.name
-        - k8s.replicaset.name
-        - k8s.cronjob.name
-        - k8s.job.name
-        - k8s.container.name
-    pod_association:
-      - sources:
-          - from: resource_attribute
-            name: k8s.pod.uid
-  metricstransform/system:
-    transforms:
-      - action: insert
-        experimental_match_labels:
-          os.type: linux
-        include: system.memory.utilization
-        match_type: strict
-        new_name: system.memory.utilization.consumed
-        operations:
-          - action: aggregate_label_values
-            aggregated_values:
-              - used
-              - cached
-            aggregation_type: sum
-            label: state
-            new_value: consumed
-      - action: insert
-        experimental_match_labels:
-          os.type: darwin
-        include: system.memory.utilization
-        match_type: strict
-        new_name: system.memory.utilization.consumed
-        operations:
-          - action: aggregate_label_values
-            aggregated_values:
-              - used
-              - inactive
-            aggregation_type: sum
-            label: state
-            new_value: consumed
-      - action: update
-        include: system.memory.utilization.consumed
-        match_type: strict
-        operations:
-          - action: delete_label_value
-            label: state
-            label_value: free
-          - action: delete_label_value
-            label: state
-            label_value: buffered
-          - action: delete_label_value
-            label: state
-            label_value: slab_reclaimable
-          - action: delete_label_value
-            label: state
-            label_value: slab_unreclaimable
-  resource:
-    attributes:
-      - action: upsert
-        from_attribute: k8s.node.uid
-        key: host.id
-      - action: upsert
-        key: k8s.cluster.name
-        value: ${env:KM_CLUSTER_NAME}
-  resource/add_node_name:
-    attributes:
-      - action: upsert
-        key: k8s.node.name
-        value: ${env:KM_NODE_NAME}
-  resource/cluster:
-    attributes:
-      - action: upsert
-        key: k8s.cluster.name
-        value: ${env:KM_CLUSTER_NAME}
-      - action: update
-        from_attribute: k8s.node.name
-        key: host.name
-  resource/hostmetrics:
-    attributes:
-      - action: insert
-        key: is.k8s.node
-        value: "yes"
-  resourcedetection:
-    detectors:
-      - env
-      - system
-    override: false
-    system:
-      hostname_sources:
-        - os
-      resource_attributes:
-        host.ip:
-          enabled: true
-    timeout: 5s
-  transform/addservicename:
-    error_mode: ignore
-    log_statements:
-      - context: log
-        statements:
-          - set(attributes["service.name"], resource.attributes["k8s.container.name"]) where resource.attributes["k8s.container.name"] != nil
-  transform/copyservicefromlogattributes:
-    error_mode: ignore
-    log_statements:
-      - context: log
-        statements:
-          - set(resource.attributes["service.name"], log.attributes["service.name"]) where
-            log.attributes["service.name"] != nil and resource.attributes["service.name"]
-            == nil
-  transform/deleteostype:
-    metric_statements:
-      - context: datapoint
-        statements:
-          - delete_key(attributes, "os.type")
-  transform/ostype:
-    metric_statements:
-      - context: datapoint
-        statements:
-          - set(attributes["os.type"], resource.attributes["os.type"])
-  transform/ratecalculation/copymetric:
-    error_mode: ignore
-    metric_statements:
-      - context: metric
-        statements:
-          - copy_metric(name="system.network.io.rate") where metric.name == "system.network.io"
-          - copy_metric(name="system.disk.io.rate") where metric.name == "system.disk.io"
-          - copy_metric(name="system.disk.operations.rate") where metric.name == "system.disk.operations"
-          - copy_metric(name="system.network.packets.rate") where metric.name == "system.network.packets"
-          - copy_metric(name="system.network.errors.rate") where metric.name == "system.network.errors"
-          - copy_metric(name="system.network.dropped.rate") where metric.name == "system.network.dropped"
-          - copy_metric(name="k8s.pod.network.io.rate") where metric.name == "k8s.pod.network.io"
-          - copy_metric(name="k8s.pod.network.errors.rate") where metric.name == "k8s.pod.network.errors"
-          - copy_metric(name="k8s.node.network.io.rate") where metric.name == "k8s.node.network.io"
-          - copy_metric(name="k8s.node.network.errors.rate") where metric.name == "k8s.node.network.errors"
-  transform/ratecalculation/sumtogauge:
-    error_mode: ignore
-    metric_statements:
-      - context: metric
-        statements:
-          - convert_sum_to_gauge() where metric.name == "system.network.io"
-          - convert_sum_to_gauge() where metric.name == "system.disk.io"
-          - convert_sum_to_gauge() where metric.name == "system.disk.operations"
-          - convert_sum_to_gauge() where metric.name == "system.network.packets"
-          - convert_sum_to_gauge() where metric.name == "system.network.errors"
-          - convert_sum_to_gauge() where metric.name == "system.network.dropped"
-          - convert_sum_to_gauge() where metric.name == "k8s.pod.network.io"
-          - convert_sum_to_gauge() where metric.name == "k8s.pod.network.errors"
-          - convert_sum_to_gauge() where metric.name == "k8s.node.network.io"
-          - convert_sum_to_gauge() where metric.name == "k8s.node.network.errors"
 receivers:
-  filelog/containers:
-    exclude:
-      - /**/*.gz
-      - /var/log/pods/km-agent_*/**/*.log
-      - ${env:KM_XLOG_PATHS:-/___no_exclude___}
-    include:
-      - /var/log/pods/*/*/*.log
-    include_file_name_resolved: true
-    include_file_path: true
-    include_file_path_resolved: true
-    max_log_size: 1MiB
-    operators:
-      # parse container log format (timestamp + stream + log)
-      - id: container-parser
-        type: container
-
-      # recombine multiline logs (stack traces, etc.)
-      - id: recombine-multiline
-        type: recombine
-        combine_field: body
-        is_first_entry: body matches "^(\\d{4}-\\d{2}-\\d{2}[T ]\\d{2}:\\d{2}:\\d{2}|\\{)"
-        combine_with: "\n"
-        max_log_size: 1048576
-        overwrite_with: newest
-        source_identifier: attributes["log.file.path"]
-
-      # try JSON parsing first
-      - id: parser-json
-        type: json_parser
-        parse_from: body
-        parse_to: attributes.parsed_json
-        on_error: send
-
-      # extract timestamp from JSON if available
-      - id: extract-timestamp-json
-        type: move
-        from: attributes.parsed_json.timestamp
-        to: attributes.timestamp_extracted
-        if: attributes.parsed_json != nil and attributes.parsed_json.timestamp != nil
-      - id: extract-timestamp-json-time
-        type: move
-        from: attributes.parsed_json.time
-        to: attributes.timestamp_extracted
-        if: attributes.parsed_json != nil and attributes.parsed_json.time != nil and attributes.timestamp_extracted == nil
-      - id: extract-timestamp-json-ts
-        type: move
-        from: attributes.parsed_json.ts
-        to: attributes.timestamp_extracted
-        if: attributes.parsed_json != nil and attributes.parsed_json.ts != nil and attributes.timestamp_extracted == nil
-
-      # extract log level from JSON
-      - id: extract-level-json
-        type: move
-        from: attributes.parsed_json.level
-        to: attributes.log_level
-        if: attributes.parsed_json != nil and attributes.parsed_json.level != nil
-      - id: extract-level-json-severity
-        type: move
-        from: attributes.parsed_json.severity
-        to: attributes.log_level
-        if: attributes.parsed_json != nil and attributes.parsed_json.severity != nil and attributes.log_level == nil
-      - id: extract-level-json-loglevel
-        type: move
-        from: attributes.parsed_json.log_level
-        to: attributes.log_level
-        if: attributes.parsed_json != nil and attributes.parsed_json.log_level != nil and attributes.log_level == nil
-
-      # extract message from JSON
-      - id: extract-message-json
-        type: move
-        from: attributes.parsed_json.message
-        to: attributes.message
-        if: attributes.parsed_json != nil and attributes.parsed_json.message != nil
-      - id: extract-message-json-msg
-        type: move
-        from: attributes.parsed_json.msg
-        to: attributes.message
-        if: attributes.parsed_json != nil and attributes.parsed_json.msg != nil and attributes.message == nil
-
-      # extract trace context from JSON
-      - id: extract-traceid-json
-        type: move
-        from: attributes.parsed_json.trace_id
-        to: attributes.trace_id
-        if: attributes.parsed_json != nil and attributes.parsed_json.trace_id != nil
-      - id: extract-traceid-json-traceid
-        type: move
-        from: attributes.parsed_json.traceId
-        to: attributes.trace_id
-        if: attributes.parsed_json != nil and attributes.parsed_json.traceId != nil and attributes.trace_id == nil
-      - id: extract-spanid-json
-        type: move
-        from: attributes.parsed_json.span_id
-        to: attributes.span_id
-        if: attributes.parsed_json != nil and attributes.parsed_json.span_id != nil
-      - id: extract-spanid-json-spanid
-        type: move
-        from: attributes.parsed_json.spanId
-        to: attributes.span_id
-        if: attributes.parsed_json != nil and attributes.parsed_json.spanId != nil and attributes.span_id == nil
-
-      # flatten remaining JSON fields as attributes
-      - id: flatten-json
-        type: flatten
-        field: attributes.parsed_json
-        if: attributes.parsed_json != nil
-
-      # parse plain text logs - extract timestamp
-      - id: parser-timestamp-iso8601
-        type: regex_parser
-        parse_from: body
-        regex: '^(?P<timestamp>\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?)'
-        parse_to: attributes.timestamp_match
-        on_error: send
-        if: attributes.timestamp_extracted == nil
-      - id: move-timestamp-iso8601
-        type: move
-        from: attributes.timestamp_match.timestamp
-        to: attributes.timestamp_extracted
-        if: attributes.timestamp_match != nil and attributes.timestamp_match.timestamp != nil
-
-      # parse log level from plain text
-      - id: parser-loglevel-plain
-        type: regex_parser
-        parse_from: body
-        regex: '(?i)\b(?P<level>trace|debug|info|warn|warning|error|fatal|critical)\b'
-        parse_to: attributes.level_match
-        on_error: send
-        if: attributes.log_level == nil
-      - id: move-loglevel-plain
-        type: move
-        from: attributes.level_match.level
-        to: attributes.log_level
-        if: attributes.level_match != nil and attributes.level_match.level != nil
-
-      # parse trace context from plain text
-      - id: parser-traceid-plain
-        type: regex_parser
-        parse_from: body
-        regex: 'trace[_-]?id[=:]\s*(?P<trace_id>[a-f0-9]{32}|[a-f0-9]{16})'
-        parse_to: attributes.trace_match
-        on_error: send
-        if: attributes.trace_id == nil
-      - id: move-traceid-plain
-        type: move
-        from: attributes.trace_match.trace_id
-        to: attributes.trace_id
-        if: attributes.trace_match != nil and attributes.trace_match.trace_id != nil
-
-      # parse timestamp and set as log timestamp
-      - id: time-parser
-        type: time_parser
-        parse_from: attributes.timestamp_extracted
-        layout_type: gotime
-        layout: '2006-01-02T15:04:05.999999999Z07:00'
-        on_error: send
-        if: attributes.timestamp_extracted != nil
-      - id: time-parser-alt1
-        type: time_parser
-        parse_from: attributes.timestamp_extracted
-        layout_type: gotime
-        layout: '2006-01-02 15:04:05.999999999'
-        on_error: send
-        if: attributes.timestamp_extracted != nil
-
-      # set default log level if not detected
-      - id: set-default-loglevel
-        type: add
-        field: attributes.log_level
-        value: "info"
-        if: attributes.log_level == nil
-
-      # normalize log level to severity
-      - id: severity-parser
-        type: severity_parser
-        parse_from: attributes.log_level
-    poll_interval: 10s
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
   hostmetrics:
     collection_interval: 60s
     scrapers:
@@ -437,49 +24,6 @@ receivers:
         metrics:
           system.disk.io:
             enabled: true
-      filesystem:
-        exclude_fs_types:
-          fs_types:
-            - autofs
-            - binfmt_misc
-            - bpf
-            - cgroup2
-            - configfs
-            - debugfs
-            - devpts
-            - devtmpfs
-            - fusectl
-            - hugetlbfs
-            - iso9660
-            - mqueue
-            - nsfs
-            - overlay
-            - proc
-            - procfs
-            - pstore
-            - rpc_pipefs
-            - securityfs
-            - selinuxfs
-            - squashfs
-            - sysfs
-            - tracefs
-          match_type: strict
-        exclude_mount_points:
-          match_type: regexp
-          mount_points:
-            - /dev/*
-            - /proc/*
-            - /sys/*
-            - /run/containerd/runc/
-            - /run/credentials/*
-            - /run/k3s/containerd/*
-            - /var/lib/containers/storage/*
-            - /var/lib/docker/*
-            - /var/lib/kubelet/*
-            - /snap/*
-        metrics:
-          system.filesystem.utilization:
-            enabled: true
       load:
         cpu_average: true
       memory:
@@ -490,38 +34,67 @@ receivers:
         metrics:
           system.network.io:
             enabled: true
-      paging: {}
-      process:
-        metrics:
-          process.cpu.utilization:
-            enabled: true
-        mute_process_cgroup_error: true
-        mute_process_exe_error: true
-        mute_process_io_error: true
-        mute_process_name_error: true
-        mute_process_user_error: true
-        resource_attributes:
-          process.owner:
-            enabled: true
-      processes: {}
       system:
         metrics:
           system.uptime:
             enabled: true
+      filesystem:
+        exclude_fs_types:
+          fs_types:
+          - autofs
+          - binfmt_misc
+          - bpf
+          - cgroup2
+          - configfs
+          - debugfs
+          - devpts
+          - devtmpfs
+          - fusectl
+          - hugetlbfs
+          - iso9660
+          - mqueue
+          - nsfs
+          - overlay
+          - proc
+          - procfs
+          - pstore
+          - rpc_pipefs
+          - securityfs
+          - selinuxfs
+          - squashfs
+          - sysfs
+          - tracefs
+          match_type: strict
+        exclude_mount_points:
+          match_type: regexp
+          mount_points:
+          - "/dev/*"
+          - "/proc/*"
+          - "/sys/*"
+          - "/run/containerd/runc/"
+          - "/run/credentials/*"
+          - "/run/k3s/containerd/*"
+          - "/var/lib/containers/storage/*"
+          - "/var/lib/docker/*"
+          - "/var/lib/kubelet/*"
+          - "/snap/*"
+        metrics:
+          system.filesystem.utilization:
+            enabled: true
   kubeletstats:
     auth_type: serviceAccount
-    collection_interval: 30s
-    endpoint: ${env:KM_NODE_NAME}:10250
+    collection_interval: 60s
+    endpoint: "${env:KM_NODE_NAME}:10250"
     extra_metadata_labels:
-      - container.id
+    - container.id
     insecure_skip_verify: true
     k8s_api_config:
       auth_type: serviceAccount
     metric_groups:
-      - volume
-      - node
-      - pod
-      - container
+    - volume
+    - node
+    - pod
+    - container
     metrics:
       k8s.container.cpu_limit_utilization:
         enabled: true
@@ -541,62 +114,323 @@ receivers:
         enabled: true
       k8s.pod.memory_request_utilization:
         enabled: true
+  filelog/container:
+    include:
+    - "/var/log/pods/*/**/*.log"
+    - "/var/log/containers/*/*.log"
+    exclude:
+    - "/**/*.gz"
+    - "${env:KM_XLOG_PATHS:-/___no_exclude___}"
+    - "/var/log/pods/*_km-agent-*/*/*.log"
+    include_file_name_resolved: true
+    include_file_path: true
+    include_file_path_resolved: true
+    start_at: end
+    operators:
+    - id: cri-recombiner
+      type: recombine
+      combine_field: body
+      is_first_entry: body matches "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+Z\\s+\\S+\\s+F\\s"
+      combine_with: ''
+    - id: extract-format
+      type: router
+      routes:
+      - output: parse-docker
+        expr: body matches "^\\{"
+      default: parse-cri
+    - id: parse-cri
+      type: regex_parser
+      regex: "^(?P<ts>\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+Z)\\s+(?P<stream>stdout|stderr)\\s+(?P<flag>[FP])\\s(?P<log>.*)$"
+      output: promote-log-cri
+    - id: promote-log-cri
+      type: move
+      from: attributes["log"]
+      to: body
+      output: extract-k8s-metadata
+    - id: parse-docker
+      type: json_parser
+      output: promote-log-docker
+    - id: promote-log-docker
+      type: move
+      from: attributes["log"]
+      to: body
+      output: extract-k8s-metadata
+    - id: extract-k8s-metadata
+      type: regex_parser
+      parse_from: attributes["log.file.path"]
+      regex: "^/var/log/pods/(?P<k8s_namespace_name>[^_]+)_(?P<k8s_pod_name>[^_]+)_(?P<k8s_pod_uid>[a-f0-9-]+)/(?P<k8s_container_name>[^/]+)/\\d+\\.log$"
+      output: merge-stacktraces
+    - id: merge-stacktraces
+      type: recombine
+      combine_field: body
+      is_first_entry: body matches "^(\\d{4}|\\{|\\d{2}:|[\\d{2}/|T]|\\[)"
+      combine_with: "\n"
+    - id: scan-severity-keyword
+      type: regex_parser
+      parse_from: body
+      regex: "^(?:.*?\\b)?(?P<level>TRACE|DEBUG|INFO|WARN(?:ING)?|ERROR|FATAL|CRITICAL|PANIC|EMERG(?:ENCY)?|NOTICE)\\b"
+      if: body != nil
+      on_error: send
+    - id: try-json
+      type: json_parser
+      if: body matches "^\\s*\\{"
+      parse_to: attributes.parsed
+      on_error: send
+    - id: map-level
+      type: move
+      from: attributes.parsed.level
+      to: attributes.level
+      if: attributes.parsed != nil and attributes.parsed.level != nil
+    - id: map-msg
+      type: move
+      from: attributes.parsed.message
+      to: attributes.message
+      if: attributes.parsed != nil and attributes.parsed.message != nil
+    - id: map-msg-alt
+      type: move
+      from: attributes.parsed.msg
+      to: attributes.message
+      if: attributes.message == nil and attributes.parsed != nil and attributes.parsed.msg
+        != nil
+    - id: map-trace
+      type: move
+      from: attributes.parsed.trace_id
+      to: attributes.trace_id
+      if: attributes.parsed != nil and attributes.parsed.trace_id != nil
+    - id: severity-parser
+      type: severity_parser
+      parse_from: attributes.level
+      if: attributes.level != nil
+      mapping:
+        info:
+        - info
+        - INFO
+        - notice
+        - NOTICE
+        - '200'
+        warn:
+        - warn
+        - warning
+        - WARN
+        - WARNING
+        error:
+        - error
+        - err
+        - ERR
+        - fatal
+        - FATAL
+        - panic
+        - PANIC
+        - ERROR
+        - '500'
+        debug:
+        - debug
+        - trace
+        - DEBUG
+        - TRACE
+processors:
+  batch:
+    send_batch_size: 10000
+    timeout: 10s
+  k8sattributes:
+    auth_type: serviceAccount
+    passthrough: false
+    filter:
+      node_from_env_var: KM_NODE_NAME
+    extract:
+      metadata:
+      - k8s.pod.name
+      - k8s.pod.uid
+      - k8s.deployment.name
+      - k8s.namespace.name
+      - k8s.node.name
+      - k8s.pod.start_time
+      - k8s.statefulset.uid
+      - k8s.replicaset.uid
+      - k8s.daemonset.uid
+      - k8s.deployment.uid
+      - k8s.job.uid
+      - k8s.pod.ip
+      - k8s.daemonset.name
+      - k8s.statefulset.name
+      - k8s.replicaset.name
+      - k8s.cronjob.name
+      - k8s.job.name
+      - k8s.container.name
+      deployment_name_from_replicaset: true
+    pod_association:
+    - sources:
+      - from: resource_attribute
+        name: k8s.pod.uid
+  resource/prepare_k8s_lookup:
+    attributes:
+    - action: insert
+      from_attribute: k8s_pod_uid
+      key: k8s.pod.uid
+  transform/promote_pod_uid:
+    log_statements:
+    - context: log
+      statements:
+      - set(resource.attributes["k8s.pod.uid"], attributes["k8s_pod_uid"]) where attributes["k8s_pod_uid"]
+        != nil
+  attributes/metrics:
+    actions:
+    - key: k8s.cluster.name
+      value: "${env:KM_CLUSTER_NAME}"
+      action: insert
+  groupbyattrs/filelog:
+    keys:
+    - k8s.pod.uid
+  metricstransform/system:
+    transforms:
+    - action: insert
+      experimental_match_labels:
+        os.type: linux
+      include: system.memory.utilization
+      new_name: system.memory.utilization.consumed
+      operations:
+      - action: aggregate_label_values
+        aggregated_values:
+        - used
+        - cached
+        aggregation_type: sum
+        label: state
+        new_value: consumed
+    - action: update
+      include: system.memory.utilization.consumed
+      operations:
+      - action: delete_label_value
+        label: state
+        label_value: free
+      - action: delete_label_value
+        label: state
+        label_value: buffered
+  resource:
+    attributes:
+    - action: upsert
+      from_attribute: k8s.node.uid
+      key: host.id
+    - action: upsert
+      key: k8s.cluster.name
+      value: "${env:KM_CLUSTER_NAME}"
+    - action: upsert
+      key: k8s.node.name
+      value: "${env:KM_NODE_NAME}"
+  resource/cluster:
+    attributes:
+    - action: upsert
+      key: k8s.cluster.name
+      value: "${env:KM_CLUSTER_NAME}"
+    - action: update
+      from_attribute: k8s.node.name
+      key: host.name
+  resource/hostmetrics:
+    attributes:
+    - action: insert
+      key: is.k8s.node
+      value: 'yes'
+  attributes/cleanup_log_intermediates:
+    actions:
+    - key: k8s_namespace_name
+      action: delete
+    - key: k8s_pod_name
+      action: delete
+    - key: k8s_pod_uid
+      action: delete
+    - key: k8s_container_name
+      action: delete
+    - key: ts
+      action: delete
+    - key: stream
+      action: delete
+    - key: flag
+      action: delete
+  transform/set_service_identity:
+    error_mode: ignore
+    log_statements:
+    - context: log
+      statements:
+      - set(resource.attributes["service.name"], attributes["k8s_container_name"])
+        where attributes["k8s_container_name"] != nil
+      - delete_key(attributes, "k8s_container_name") where resource.attributes["service.name"]
+        != nil
+  transform/ostype:
+    metric_statements:
+    - context: datapoint
+      statements:
+      - set(datapoint.attributes["os.type"], resource.attributes["os.type"])
+  transform/deleteostype:
+    metric_statements:
+    - context: datapoint
+      statements:
+      - delete_key(datapoint.attributes, "os.type")
+exporters:
+  otlphttp:
+    endpoint: "${env:KM_COLLECTOR_ENDPOINT}"
+    headers:
+      Authorization: "${env:KM_API_KEY}"
 service:
+  extensions:
+  - health_check
   telemetry:
     metrics:
       level: none
-  extensions:
-    - health_check
   pipelines:
-    logs/containers:
-      exporters:
-        - otlphttp
-      processors:
-        - resource
-        - resource/add_node_name
-        - resource/cluster
-        - attributes/logs
-        - groupbyattrs/filelog
-        - k8sattributes
-        - transform/addservicename
-        - transform/copyservicefromlogattributes
-        - batch
-      receivers:
-        - filelog/containers
     metrics/hostmetrics:
-      exporters:
-        - otlphttp
-      processors:
-        - resourcedetection
-        - resource
-        - resource/hostmetrics
-        - resource/cluster
-        - k8sattributes
-        - transform/ostype
-        - attributes/logs
-        - metricstransform/system
-        - transform/deleteostype
-        - attributes/metrics
-        - transform/ratecalculation/copymetric
-        - cumulativetodelta
-        - deltatorate
-        - transform/ratecalculation/sumtogauge
-        - batch
       receivers:
-        - hostmetrics
+      - hostmetrics
+      processors:
+      - resource
+      - resource/hostmetrics
+      - resource/cluster
+      - k8sattributes
+      - transform/ostype
+      - metricstransform/system
+      - transform/deleteostype
+      - attributes/metrics
+      - batch
+      exporters:
+      - otlphttp
     metrics/kubeletstats:
-      exporters:
-        - otlphttp
-      processors:
-        - resourcedetection
-        - resource/add_node_name
-        - resource
-        - k8sattributes
-        - resource/cluster
-        - attributes/logs
-        - transform/ratecalculation/copymetric
-        - transform/ratecalculation/sumtogauge
-        - attributes/metrics
-        - batch
       receivers:
-        - kubeletstats
+      - kubeletstats
+      processors:
+      - resource
+      - k8sattributes
+      - resource/cluster
+      - attributes/metrics
+      - batch
+      exporters:
+      - otlphttp
+    metrics/otlp:
+      receivers:
+      - otlp
+      processors:
+      - k8sattributes
+      - resource/cluster
+      - batch
+      exporters:
+      - otlphttp
+    traces/otlp:
+      receivers:
+      - otlp
+      processors:
+      - resource
+      - k8sattributes
+      - batch
+      exporters:
+      - otlphttp
+    logs/container:
+      receivers:
+      - filelog/container
+      processors:
+      - transform/promote_pod_uid
+      - groupbyattrs/filelog
+      - k8sattributes
+      - resource/cluster
+      - transform/set_service_identity
+      - attributes/cleanup_log_intermediates
+      - resource
+      - batch
+      exporters:
+      - otlphttp
