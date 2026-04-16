@@ -66,20 +66,20 @@ jobs:
           GNUPGHOME=/home/runner/.gnupg
           mkdir -p $GNUPGHOME
           chmod 700 $GNUPGHOME
-          echo "allow-loopback-pinentry" >> $GNUPGHOME/gpg-agent.conf
           echo -n "${{ secrets.RPM_GPG_PASSPHRASE }}" > $GNUPGHOME/passphrase
           chmod 600 $GNUPGHOME/passphrase
-          echo "passphrase-file $GNUPGHOME/passphrase" >> $GNUPGHOME/gpg.conf
+          printf 'no-tty\nbatch\nuse-agent\npinentry-mode loopback\npassphrase-file %s/passphrase\n' "$GNUPGHOME" > $GNUPGHOME/gpg.conf
           echo "${{ secrets.RPM_GPG_PRIVATE_KEY }}" | GNUPGHOME=$GNUPGHOME gpg --batch --import
       - name: Sign Linux RPM packages
         if: matrix.target != 'windows'
         run: |
           export GNUPGHOME=/home/runner/.gnupg
           export GPG_TTY=/dev/null
+          export GPG_BATCH=1
           for rpm in dist/rpm-*/RPMS/*/*.rpm; do
             if [ -f "$rpm" ]; then
               echo "Signing $rpm..."
-              rpm --define "_gpg_name amitava@kloudmate.com" --resign "$rpm"
+              rpm --define "_gpg_name amitava@kloudmate.com" --define "_gpg_passphrase_file /home/runner/.gnupg/passphrase" --resign "$rpm"
               rpm --checksig "$rpm"
             fi
           done
