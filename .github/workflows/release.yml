@@ -75,13 +75,17 @@ jobs:
       - name: Sign Linux RPM packages
         if: matrix.target != 'windows'
         run: |
+          PASSPHRASE_FILE=$(mktemp)
+          echo -n "${{ secrets.RPM_GPG_PASSPHRASE }}" > $PASSPHRASE_FILE
+          chmod 600 $PASSPHRASE_FILE
           for rpm in dist/rpm-*/RPMS/*/*.rpm; do
             if [ -f "$rpm" ]; then
               echo "Signing $rpm..."
-              ./scripts/sign_rpm.exp "$rpm" "amitava@kloudmate.com" "${{ secrets.RPM_GPG_PASSPHRASE }}"
+              rpm --define "_gpg_name amitava@kloudmate.com" --define "__gpg_passphrase_file $PASSPHRASE_FILE" --resign "$rpm"
               rpm --checksig "$rpm"
             fi
           done
+          rm -f $PASSPHRASE_FILE
       - name: Build Windows Installer package (using Docker via make)
         if: matrix.target == 'windows'
         run: make VERSION=${{ env.VERSION }} package-windows
