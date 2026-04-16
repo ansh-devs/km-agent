@@ -19,7 +19,7 @@ set env(GPG_TTY) $spawn_out(slave,name)
 exec stty rows 24 cols 80 < $spawn_out(slave,name)
 
 expect {
-    -nocase "enter pass *phrase:" {
+    -nocase -re "pass *phrase" {
         send "$passphrase\r"
         exp_continue
     }
