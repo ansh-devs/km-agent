@@ -1,8 +1,9 @@
+---
 exporters:
   otlphttp:
-    endpoint: ${env:KM_COLLECTOR_ENDPOINT}
+    endpoint: "${env:KM_COLLECTOR_ENDPOINT}"
     headers:
-      Authorization: ${env:KM_API_KEY}
+      Authorization: "${env:KM_API_KEY}"
 extensions:
   health_check:
     endpoint: 0.0.0.0:13133
@@ -12,155 +13,156 @@ processors:
     timeout: 10s
   k8sattributes:
     auth_type: serviceAccount
+    filter:
+      node_from_env_var: KM_NODE_NAME
     extract:
       metadata:
-        - k8s.pod.name
-        - k8s.pod.uid
-        - k8s.deployment.name
-        - k8s.namespace.name
-        - k8s.node.name
-        - k8s.pod.start_time
-        - k8s.statefulset.uid
-        - k8s.replicaset.uid
-        - k8s.daemonset.uid
-        - k8s.deployment.uid
-        - k8s.job.uid
-        - k8s.pod.ip
-        - k8s.daemonset.name
-        - k8s.statefulset.name
-        - k8s.replicaset.name
-        - k8s.cronjob.name
-        - k8s.job.name
+      - k8s.pod.name
+      - k8s.pod.uid
+      - k8s.deployment.name
+      - k8s.namespace.name
+      - k8s.node.name
+      - k8s.pod.start_time
+      - k8s.statefulset.uid
+      - k8s.replicaset.uid
+      - k8s.daemonset.uid
+      - k8s.deployment.uid
+      - k8s.job.uid
+      - k8s.pod.ip
+      - k8s.daemonset.name
+      - k8s.statefulset.name
+      - k8s.replicaset.name
+      - k8s.cronjob.name
+      - k8s.job.name
     passthrough: false
     pod_association:
-      - sources:
-          - from: resource_attribute
-            name: k8s.pod.uid
+    - sources:
+      - from: resource_attribute
+        name: k8s.pod.uid
   resource:
     attributes:
-      - action: upsert
-        from_attribute: host.name
-        key: host.id
-      - action: upsert
-        key: k8s.cluster.name
-        value: ${env:KM_CLUSTER_NAME}
-      - action: upsert
-        key: km.agent.version
-        value: ${env:KM_AGENT_VERSION}
+    - action: upsert
+      from_attribute: host.name
+      key: host.id
+    - action: upsert
+      key: k8s.cluster.name
+      value: "${env:KM_CLUSTER_NAME}"
+    - action: upsert
+      key: km.agent.version
+      value: "${env:KM_AGENT_VERSION}"
   resource/cluster:
     attributes:
-      - action: upsert
-        key: k8s.cluster.name
-        value: ${env:KM_CLUSTER_NAME}
-      - action: update
-        from_attribute: k8s.node.name
-        key: host.id
-      - action: update
-        from_attribute: k8s.node.name
-        key: host.name
+    - action: upsert
+      key: k8s.cluster.name
+      value: "${env:KM_CLUSTER_NAME}"
+    - action: update
+      from_attribute: k8s.node.name
+      key: host.id
+    - action: update
+      from_attribute: k8s.node.name
+      key: host.name
+  resource/k8s_events:
+    attributes:
+    - action: upsert
+      key: service.name
+      value: k8s-events
   transform/setservicename:
     error_mode: ignore
     log_statements:
-      - context: resource
-        statements:
-          # Set service.name based on K8s resource type:
-          # - "k8s-events" if log contains event.domain or event.name (from k8s_events receiver)
-          # - "k8s-objects" if log contains @message.object (from k8sobjects receiver)
-          - set(attributes["service.name"], "k8s-events") where attributes["event.domain"] == "k8s" and attributes["service.name"] == nil
-          - set(attributes["service.name"], "k8s-objects") where attributes["@message.object.kind"] != nil and attributes["service.name"] == nil
+    - context: resource
+      statements:
+      - set(attributes["service.name"], "k8s-events") where attributes["k8s.event.name"]
+        != nil and attributes["service.name"] == nil
+      - set(attributes["service.name"], "k8s-objects") where attributes["@message.object.kind"]
+        != nil and attributes["service.name"] == nil
   transform/loglevels:
     log_statements:
-      - context: log
-        error_mode: ignore
-        statements:
-          # JSON parsing: Extends log attributes with the fields from structured log body content, either as an OTEL map or
-          # as a string containing JSON content.
-          - set(log.cache, ExtractPatterns(log.body, "(?P<0>(\\{.*\\}))")) where
-            IsString(log.body)
-          - merge_maps(log.attributes, ParseJSON(log.cache["0"]), "upsert")
-            where IsMap(log.cache) and log.cache["0"] != nil
-          - flatten(log.attributes) where IsMap(log.cache) and log.cache["0"] != nil
-          - merge_maps(log.attributes, log.body, "upsert") where IsMap(log.body)
-      - context: log
-        error_mode: ignore
-        conditions:
-          - severity_number == 0 and severity_text == ""
-        statements:
-          # Check for severity/level in attributes first (from JSON parsing)
-          - set(log.severity_text, log.attributes["severity"]) where log.attributes["severity"] != nil
-          - set(log.severity_text, log.attributes["level"]) where log.attributes["level"] != nil and log.severity_text == ""
-          - set(log.severity_text, log.attributes["log_level"]) where log.attributes["log_level"] != nil and log.severity_text == ""
-          - set(log.severity_text, log.attributes["@message"]["severity"]) where IsMap(log.attributes["@message"]) and log.attributes["@message"]["severity"] != nil and log.severity_text == ""
-          - set(log.severity_text, log.attributes["@message"]["level"]) where IsMap(log.attributes["@message"]) and log.attributes["@message"]["level"] != nil and log.severity_text == ""
-
-          # Detect event type from k8s objects and map to severity
-          - set(log.severity_text, "warn") where log.attributes["@message"]["type"] == "DELETED" or log.attributes["event"]["type"] == "DELETED"
-          - set(log.severity_text, "info") where (log.attributes["@message"]["type"] == "ADDED" or log.attributes["@message"]["type"] == "MODIFIED" or log.attributes["event"]["type"] == "ADDED" or log.attributes["event"]["type"] == "MODIFIED") and log.severity_text == ""
-
-          # Infer: extract the first log level keyword from the first 256 characters of the body
-          - set(log.cache["substr"], log.body.string) where IsString(log.body) and Len(log.body.string) < 256 and log.severity_text == ""
-          - set(log.cache["substr"], Substring(log.body.string, 0, 256)) where IsString(log.body) and Len(log.body.string) >= 256 and log.severity_text == ""
-          - set(log.cache, ExtractPatterns(log.cache["substr"], "(?i)(?P<0>(alert|crit|emerg|fatal|error|err|warn|notice|debug|dbug|trace))")) where log.cache["substr"] != nil
-
-          # Infer: detect FATAL
-          - set(log.severity_number, SEVERITY_NUMBER_FATAL) where
-            IsMatch(log.cache["0"], "(?i)(alert|crit|emerg|fatal)") or IsMatch(log.severity_text, "(?i)(alert|crit|emerg|fatal)")
-          - set(log.severity_text, "fatal") where log.severity_number ==
-            SEVERITY_NUMBER_FATAL
-          # Infer: detect ERROR
-          - set(log.severity_number, SEVERITY_NUMBER_ERROR) where
-            (IsMatch(log.cache["0"], "(?i)(error|err)") or IsMatch(log.severity_text, "(?i)(error|err)")) and log.severity_number == 0
-          - set(log.severity_text, "error") where log.severity_number ==
-            SEVERITY_NUMBER_ERROR
-          # Infer: detect WARN
-          - set(log.severity_number, SEVERITY_NUMBER_WARN) where
-            (IsMatch(log.cache["0"], "(?i)(warn|notice)") or IsMatch(log.severity_text, "(?i)(warn|notice|warning)")) and log.severity_number == 0
-          - set(log.severity_text, "warn") where log.severity_number ==
-            SEVERITY_NUMBER_WARN
-          # Infer: detect DEBUG
-          - set(log.severity_number, SEVERITY_NUMBER_DEBUG) where
-            (IsMatch(log.cache["0"], "(?i)(debug|dbug)") or IsMatch(log.severity_text, "(?i)(debug|dbug)")) and log.severity_number == 0
-          - set(log.severity_text, "debug") where log.severity_number ==
-            SEVERITY_NUMBER_DEBUG
-          # Infer: detect TRACE
-          - set(log.severity_number, SEVERITY_NUMBER_TRACE) where
-            (IsMatch(log.cache["0"], "(?i)(trace)") or IsMatch(log.severity_text, "(?i)(trace)")) and log.severity_number == 0
-          - set(log.severity_text, "trace") where log.severity_number ==
-            SEVERITY_NUMBER_TRACE
-          # Infer: detect INFO
-          - set(log.severity_number, SEVERITY_NUMBER_INFO) where
-            IsMatch(log.severity_text, "(?i)(info)") and log.severity_number == 0
-          # Infer: else - default to INFO
-          - set(log.severity_text, "info") where log.severity_number == 0
-          - set(log.severity_number, SEVERITY_NUMBER_INFO) where log.severity_number == 0
-      - context: log
-        error_mode: ignore
-        statements:
-          # Normalize the severity_text case
-          - set(log.severity_text, ConvertCase(log.severity_text, "lower"))
+    - context: log
+      error_mode: ignore
+      statements:
+      - set(log.cache, ExtractPatterns(log.body, "(?P<0>(\\{.*\\}))")) where IsString(log.body)
+      - merge_maps(log.attributes, ParseJSON(log.cache["0"]), "upsert") where IsMap(log.cache)
+        and log.cache["0"] != nil
+      - flatten(log.attributes) where IsMap(log.cache) and log.cache["0"] != nil
+      - merge_maps(log.attributes, log.body, "upsert") where IsMap(log.body)
+    - context: log
+      error_mode: ignore
+      conditions:
+      - severity_number == 0 and severity_text == ""
+      statements:
+      - set(log.severity_text, log.attributes["severity"]) where log.attributes["severity"]
+        != nil
+      - set(log.severity_text, log.attributes["level"]) where log.attributes["level"]
+        != nil and log.severity_text == ""
+      - set(log.severity_text, log.attributes["log_level"]) where log.attributes["log_level"]
+        != nil and log.severity_text == ""
+      - set(log.severity_text, log.attributes["@message"]["severity"]) where IsMap(log.attributes["@message"])
+        and log.attributes["@message"]["severity"] != nil and log.severity_text ==
+        ""
+      - set(log.severity_text, log.attributes["@message"]["level"]) where IsMap(log.attributes["@message"])
+        and log.attributes["@message"]["level"] != nil and log.severity_text == ""
+      - set(log.severity_text, "warn") where log.attributes["@message"]["type"] ==
+        "DELETED" or log.attributes["event"]["type"] == "DELETED"
+      - set(log.severity_text, "info") where (log.attributes["@message"]["type"] ==
+        "ADDED" or log.attributes["@message"]["type"] == "MODIFIED" or log.attributes["event"]["type"]
+        == "ADDED" or log.attributes["event"]["type"] == "MODIFIED") and log.severity_text
+        == ""
+      - set(log.cache["substr"], log.body.string) where IsString(log.body) and Len(log.body.string)
+        < 256 and log.severity_text == ""
+      - set(log.cache["substr"], Substring(log.body.string, 0, 256)) where IsString(log.body)
+        and Len(log.body.string) >= 256 and log.severity_text == ""
+      - set(log.cache, ExtractPatterns(log.cache["substr"], "(?i)(?P<0>(alert|crit|emerg|fatal|error|err|warn|notice|debug|dbug|trace))"))
+        where log.cache["substr"] != nil
+      - set(log.severity_number, SEVERITY_NUMBER_FATAL) where IsMatch(log.cache["0"],
+        "(?i)(alert|crit|emerg|fatal)") or IsMatch(log.severity_text, "(?i)(alert|crit|emerg|fatal)")
+      - set(log.severity_text, "fatal") where log.severity_number == SEVERITY_NUMBER_FATAL
+      - set(log.severity_number, SEVERITY_NUMBER_ERROR) where (IsMatch(log.cache["0"],
+        "(?i)(error|err)") or IsMatch(log.severity_text, "(?i)(error|err)")) and log.severity_number
+        == 0
+      - set(log.severity_text, "error") where log.severity_number == SEVERITY_NUMBER_ERROR
+      - set(log.severity_number, SEVERITY_NUMBER_WARN) where (IsMatch(log.cache["0"],
+        "(?i)(warn|notice)") or IsMatch(log.severity_text, "(?i)(warn|notice|warning)"))
+        and log.severity_number == 0
+      - set(log.severity_text, "warn") where log.severity_number == SEVERITY_NUMBER_WARN
+      - set(log.severity_number, SEVERITY_NUMBER_DEBUG) where (IsMatch(log.cache["0"],
+        "(?i)(debug|dbug)") or IsMatch(log.severity_text, "(?i)(debug|dbug)")) and
+        log.severity_number == 0
+      - set(log.severity_text, "debug") where log.severity_number == SEVERITY_NUMBER_DEBUG
+      - set(log.severity_number, SEVERITY_NUMBER_TRACE) where (IsMatch(log.cache["0"],
+        "(?i)(trace)") or IsMatch(log.severity_text, "(?i)(trace)")) and log.severity_number
+        == 0
+      - set(log.severity_text, "trace") where log.severity_number == SEVERITY_NUMBER_TRACE
+      - set(log.severity_number, SEVERITY_NUMBER_INFO) where IsMatch(log.severity_text,
+        "(?i)(info)") and log.severity_number == 0
+      - set(log.severity_text, "info") where log.severity_number == 0
+      - set(log.severity_number, SEVERITY_NUMBER_INFO) where log.severity_number ==
+        0
+    - context: log
+      error_mode: ignore
+      statements:
+      - set(log.severity_text, ConvertCase(log.severity_text, "lower"))
   transform/add_labels:
     log_statements:
-      - context: log
-        statements: []
+    - context: log
+      statements: []
   transform/copyservicefromlogattributes:
     error_mode: ignore
     log_statements:
-      - context: log
-        statements:
-          - set(resource.attributes["service.name"], log.attributes["service.name"]) where
-            log.attributes["service.name"] != nil and resource.attributes["service.name"]
-            == nil
+    - context: log
+      statements:
+      - set(resource.attributes["service.name"], log.attributes["service.name"]) where
+        log.attributes["service.name"] != nil and resource.attributes["service.name"]
+        == nil
 receivers:
   k8s_cluster:
     allocatable_types_to_report:
-      - cpu
-      - memory
-      - ephemeral-storage
-      - storage
-      - pods
+    - cpu
+    - memory
+    - ephemeral-storage
+    - storage
+    - pods
     auth_type: serviceAccount
     collection_interval: 30s
-    # use distribution as openshift if deployed to redhat openshift
     distribution: kubernetes
     metrics:
       k8s.container.cpu_request:
@@ -170,129 +172,116 @@ receivers:
       k8s.node.condition:
         enabled: true
     node_conditions_to_report:
-      - Ready
-      - DiskPressure
-      - MemoryPressure
-      - PIDPressure
-      - NetworkUnavailable
+    - Ready
+    - DiskPressure
+    - MemoryPressure
+    - PIDPressure
+    - NetworkUnavailable
   k8s_events:
     auth_type: serviceAccount
-    namespaces: ${env:KM_K8S_MONITORED_NAMESPACES_YAML:-"all"}
   k8sobjects/1:
     auth_type: serviceAccount
     objects:
-      - interval: 24h
-        mode: pull
-        name: pods
-      - interval: 24h
-        mode: pull
-        name: nodes
-      - mode: pull
-        name: replicasets
-      - mode: pull
-        name: namespaces
-      - mode: pull
-        name: deployments
-      - mode: pull
-        name: daemonsets
-      - mode: pull
-        name: statefulsets
-      - mode: pull
-        name: configmaps
+    - interval: 24h
+      mode: pull
+      name: pods
+    - interval: 24h
+      mode: pull
+      name: nodes
+    - mode: pull
+      name: replicasets
+    - mode: pull
+      name: namespaces
+    - mode: pull
+      name: deployments
+    - mode: pull
+      name: daemonsets
+    - mode: pull
+      name: statefulsets
+    - mode: pull
+      name: configmaps
   k8sobjects/2:
     auth_type: serviceAccount
     objects:
-      - mode: watch
-        name: pods
-      - mode: watch
-        name: nodes
-      - mode: watch
-        name: replicasets
-      - mode: watch
-        name: namespaces
-      - mode: watch
-        name: deployments
-      - mode: watch
-        name: daemonsets
-      - mode: watch
-        name: statefulsets
-      - mode: watch
-        name: configmaps
+    - mode: watch
+      name: pods
+    - mode: watch
+      name: nodes
+    - mode: watch
+      name: replicasets
+    - mode: watch
+      name: namespaces
+    - mode: watch
+      name: deployments
+    - mode: watch
+      name: daemonsets
+    - mode: watch
+      name: statefulsets
+    - mode: watch
+      name: configmaps
   otlp:
     protocols:
       grpc:
-        endpoint: "0.0.0.0:4317"
+        endpoint: 0.0.0.0:4317
       http:
-        endpoint: "0.0.0.0:4318"
+        endpoint: 0.0.0.0:4318
 service:
+  extensions:
+  - health_check
   telemetry:
     metrics:
       level: none
-  extensions:
-    - health_check
   pipelines:
     logs/k8s_events:
       exporters:
-        - otlphttp
+      - otlphttp
       processors:
-        - resource
-        - resource/cluster
-        - k8sattributes
-        - transform/setservicename
-        - transform/loglevels
-        - batch
+      - resource/k8s_events
+      - resource
+      - resource/cluster
+      - k8sattributes
+      - transform/loglevels
+      - batch
       receivers:
-        - k8s_events
-    # logs/k8sobjects:
-    #   exporters:
-    #     - otlphttp
-    #   processors:
-    #     - resource
-    #     - resource/k8s_objects
-    #     - resource/cluster
-    #     - k8sattributes
-    #     - batch
-    #   receivers:
-    #     - k8sobjects/1
-    #     - k8sobjects/2
+      - k8s_events
     logs/otlp:
       exporters:
-        - otlphttp
+      - otlphttp
       processors:
-        - resource
-        - resource/cluster
-        - k8sattributes
-        - transform/copyservicefromlogattributes
-        - batch
+      - resource
+      - resource/cluster
+      - k8sattributes
+      - transform/copyservicefromlogattributes
+      - batch
       receivers:
-        - otlp
+      - otlp
     metrics/k8s_cluster:
       exporters:
-        - otlphttp
+      - otlphttp
       processors:
-        - resource
-        - k8sattributes
-        - resource/cluster
-        - batch
+      - resource
+      - k8sattributes
+      - resource/cluster
+      - batch
       receivers:
-        - k8s_cluster
+      - k8s_cluster
     metrics/otlp:
       exporters:
-        - otlphttp
+      - otlphttp
       processors:
-        - resource
-        - k8sattributes
-        - resource/cluster
-        - batch
+      - resource
+      - k8sattributes
+      - resource/cluster
+      - batch
       receivers:
-        - otlp
+      - otlp
     traces/otlp:
       exporters:
-        - otlphttp
+      - otlphttp
       processors:
-        - resource
-        - resource/cluster
-        - k8sattributes
-        - batch
+      - resource
+      - resource/cluster
+      - k8sattributes
+      - batch
       receivers:
-        - otlp
+      - otlp

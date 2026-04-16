@@ -1,32 +1,114 @@
-# This config file will be used by the KM-Agent on it's first initialization in docker mode.
+---
 receivers:
   filelog:
     include:
-      - /var/log/**/*.log
-      - /var/lib/docker/containers/**/*.log*
-      - ${env:FILELOG_PATHS}
+    - "/var/log/**/*.log"
+    - "/var/lib/docker/containers/**/*.log*"
+    - "/var/lib/docker/containers/*/*.log"
+    - "${env:FILELOG_PATHS}"
     exclude:
-      - /var/log/kmagent*/**/*.log
-      - '**/*.gz'
-      - '**/*.zip'
-      - '**/*.tar'
-      - '**/*.xz'
-      - '**/.*'
-      - '**/*.tmp'
-      - '**/*~'
+    - "/var/log/kmagent*/**/*.log"
+    - "**/*.gz"
+    - "**/*.zip"
+    - "**/*.tar"
+    - "**/*.xz"
+    - "**/.*"
+    - "**/*.tmp"
+    - "**/*~"
     include_file_name_resolved: true
     include_file_path: true
     include_file_path_resolved: true
-    max_log_size: "1MiB"
-
+    max_log_size: 1MiB
+    start_at: end
+    operators:
+    - id: parse-docker-json
+      type: json_parser
+      output: move-log-to-body
+    - id: move-log-to-body
+      type: move
+      from: attributes.log
+      to: body
+      output: extract-docker-metadata
+    - id: extract-docker-metadata
+      type: regex_parser
+      parse_from: attributes["log.file.path"]
+      regex: "^/var/lib/docker/containers/(?P<container_id>[a-f0-9]+)/[a-f0-9]+-json\\.log$"
+      output: merge-stacktraces
+    - id: merge-stacktraces
+      type: recombine
+      combine_field: body
+      is_first_entry: body matches "^(\\d{4}|\\{|\\d{2}:|[\\d{2}/|T]|\\[)"
+      combine_with: "\n"
+    - id: scan-severity-keyword
+      type: regex_parser
+      parse_from: body
+      regex: "^(?:.*?\\b)?(?P<level>TRACE|DEBUG|INFO|WARN(?:ING)?|ERROR|FATAL|CRITICAL|PANIC|EMERG(?:ENCY)?|NOTICE)\\b"
+      if: body != nil
+      on_error: send
+    - id: try-json
+      type: json_parser
+      if: body matches "^\\s*\\{"
+      parse_to: attributes.parsed
+      on_error: send
+    - id: map-level
+      type: move
+      from: attributes.parsed.level
+      to: attributes.level
+      if: attributes.parsed != nil and attributes.parsed.level != nil
+    - id: map-msg
+      type: move
+      from: attributes.parsed.message
+      to: attributes.message
+      if: attributes.parsed != nil and attributes.parsed.message != nil
+    - id: map-msg-alt
+      type: move
+      from: attributes.parsed.msg
+      to: attributes.message
+      if: attributes.message == nil and attributes.parsed != nil and attributes.parsed.msg
+        != nil
+    - id: map-trace
+      type: move
+      from: attributes.parsed.trace_id
+      to: attributes.trace_id
+      if: attributes.parsed != nil and attributes.parsed.trace_id != nil
+    - id: severity-parser
+      type: severity_parser
+      parse_from: attributes.level
+      if: attributes.level != nil
+      mapping:
+        info:
+        - info
+        - INFO
+        - notice
+        - NOTICE
+        - '200'
+        warn:
+        - warn
+        - warning
+        - WARN
+        - WARNING
+        error:
+        - error
+        - err
+        - ERR
+        - fatal
+        - FATAL
+        - panic
+        - PANIC
+        - ERROR
+        - '500'
+        debug:
+        - debug
+        - trace
+        - DEBUG
+        - TRACE
   docker_stats:
-    endpoint: "unix:///var/run/docker.sock"
+    endpoint: unix:///var/run/docker.sock
     collection_interval: 60s
     timeout: 10s
-
   hostmetrics:
     collection_interval: 60s
-    root_path: /hostfs
+    root_path: "/hostfs"
     scrapers:
       cpu:
         metrics:
@@ -36,135 +118,110 @@ receivers:
         metrics:
           system.memory.utilization:
             enabled: true
-      disk:
-      network:
+      disk: 
+      network: 
       filesystem:
+        metrics:
+          system.filesystem.utilization:
+            enabled: true
         include_virtual_filesystems: true
         exclude_fs_types:
           fs_types:
-            - autofs
-            - binfmt_misc
-            - bpf
-            - cgroup
-            - cgroup2
-            - configfs
-            - debugfs
-            - devpts
-            - devtmpfs
-            - fusectl
-            - hugetlbfs
-            - iso9660
-            - mqueue
-            - nsfs
-            - overlay
-            - proc
-            - procfs
-            - pstore
-            - rpc_pipefs
-            - securityfs
-            - selinuxfs
-            - squashfs
-            - sysfs
-            - tracefs
+          - autofs
+          - binfmt_misc
+          - bpf
+          - cgroup
+          - cgroup2
+          - configfs
+          - debugfs
+          - devpts
+          - devtmpfs
+          - fusectl
+          - hugetlbfs
+          - iso9660
+          - mqueue
+          - nsfs
+          - overlay
+          - proc
+          - procfs
+          - pstore
+          - rpc_pipefs
+          - securityfs
+          - selinuxfs
+          - squashfs
+          - sysfs
+          - tracefs
           match_type: strict
         exclude_mount_points:
           mount_points:
-            - /dev/*
-            - /proc/*
-            - /sys/*
-            - /snap/*
-            - /var/lib/docker/*
-            - /var/lib/containerd/*
-            - /var/lib/kubelet/*
-            - /run/containerd/*
-            - /run/k3s/*
-            - /run/credentials/*
-            - /run/user/*
+          - "/dev/*"
+          - "/proc/*"
+          - "/sys/*"
+          - "/snap/*"
+          - "/var/lib/docker/*"
+          - "/var/lib/containerd/*"
+          - "/var/lib/kubelet/*"
+          - "/run/containerd/*"
+          - "/run/k3s/*"
+          - "/run/credentials/*"
+          - "/run/user/*"
           match_type: regexp
       load:
         cpu_average: true
   otlp:
     protocols:
-      grpc:
-      http:
-
+      grpc: 
+      http: 
 exporters:
   debug:
     verbosity: basic
   otlphttp:
     sending_queue:
       enabled: true
-      num_consumers: 10 # Increase to process more items in parallel
-      queue_size: 10000 # Increase queue size to handle bursts
-    endpoint: ${env:KM_COLLECTOR_ENDPOINT}
+      num_consumers: 10
+      queue_size: 10000
+    endpoint: "${env:KM_COLLECTOR_ENDPOINT}"
     headers:
-      Authorization: ${env:KM_API_KEY}
-
+      Authorization: "${env:KM_API_KEY}"
 processors:
   batch:
     send_batch_size: 10000
     timeout: 30s
   resourcedetection:
-    detectors: [env, system, docker]
+    detectors:
+    - env
+    - system
+    - docker
     override: false
   resource:
     attributes:
-      - key: service.name
-        action: insert
-        from_attribute: host.name
-  cumulativetodelta:
-    include:
-      match_type: strict
-      metrics:
-        - system.network.io
-        - system.disk.io
-        - system.disk.operations.rate
-        - system.network.packets.rate
-        - system.network.errors.rate
-        - system.network.dropped.rate
-  deltatorate:
-    metrics:
-      - system.network.io
-      - system.disk.io
-      - system.disk.operations.rate
-      - system.network.packets.rate
-      - system.network.errors.rate
-      - system.network.dropped.rate
-  transform/ratecalculation/copymetric:
-    error_mode: ignore
-    metric_statements:
-      - context: metric
-        statements:
-          - copy_metric(name="system.network.io.rate") where metric.name == "system.network.io"
-          - copy_metric(name="system.disk.io.rate") where metric.name == "system.disk.io"
-          - copy_metric(name="system.disk.operations.rate") where metric.name == "system.disk.operations"
-          - copy_metric(name="system.network.packets.rate") where metric.name == "system.network.packets"
-          - copy_metric(name="system.network.errors.rate") where metric.name == "system.network.errors"
-          - copy_metric(name="system.network.dropped.rate") where metric.name == "system.network.dropped"
-  transform/ratecalculation/sumtogauge:
-    error_mode: ignore
-    metric_statements:
-      - context: metric
-        statements:
-          - convert_sum_to_gauge() where metric.name == "system.network.io"
-          - convert_sum_to_gauge() where metric.name == "system.disk.io"
-          - convert_sum_to_gauge() where metric.name == "system.disk.operations"
-          - convert_sum_to_gauge() where metric.name == "system.network.packets"
-          - convert_sum_to_gauge() where metric.name == "system.network.errors"
-          - convert_sum_to_gauge() where metric.name == "system.network.dropped"
-
-extensions:
-
+    - key: service.name
+      action: insert
+      from_attribute: host.name
+extensions: 
 service:
   telemetry:
     metrics:
       level: none
   pipelines:
     metrics:
-      receivers: [hostmetrics, docker_stats]
-      processors: [resourcedetection, resource, cumulativetodelta, deltatorate, transform/ratecalculation/sumtogauge, transform/ratecalculation/copymetric, batch]
-      exporters: [otlphttp, debug]
+      receivers:
+      - hostmetrics
+      - docker_stats
+      processors:
+      - resourcedetection
+      - resource
+      - batch
+      exporters:
+      - otlphttp
+      - debug
     logs:
-      receivers: [filelog]
-      processors: [resourcedetection, resource, batch]
-      exporters: [otlphttp, debug]
+      receivers:
+      - filelog
+      processors:
+      - resourcedetection
+      - resource
+      - batch
+      exporters:
+      - otlphttp
+      - debug
