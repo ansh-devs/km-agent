@@ -75,9 +75,12 @@ jobs:
           no-tty
           batch
           pinentry-mode loopback
+          passphrase-file /home/runner/.gnupg/passphrase
           EOF
           gpgconf --kill gpg-agent
           gpgconf --launch gpg-agent
+          echo -n "${{ secrets.RPM_GPG_PASSPHRASE }}" > ~/.gnupg/passphrase
+          chmod 600 ~/.gnupg/passphrase
           echo "${{ secrets.RPM_GPG_PRIVATE_KEY }}" | gpg --batch --import
           FINGERPRINT=$(gpg --list-keys --with-colons "amitava@kloudmate.com" | grep "^fpr" | head -1 | cut -d: -f10)
           echo "$FINGERPRINT:6:" | gpg --import-ownertrust
@@ -86,16 +89,14 @@ jobs:
           rm /tmp/gpg-public-key.asc
       - name: Sign Linux RPM packages
         if: matrix.target != 'windows'
-        env:
-          GPG_PASSPHRASE: ${{ secrets.RPM_GPG_PASSPHRASE }}
         run: |
           for rpm in dist/rpm-*/RPMS/*/*.rpm; do
             if [ -f "$rpm" ]; then
               echo "Signing $rpm..."
               rpmsign \
                 --define "_gpg_name amitava@kloudmate.com" \
-                --define "_gpg_sign_cmd_extra_args --batch --pinentry-mode loopback --passphrase-fd 0" \
-                --addsign "$rpm" <<< "$GPG_PASSPHRASE"
+                --define "_gpg_sign_cmd_extra_args --batch --pinentry-mode loopback" \
+                --addsign "$rpm"
               rpm --checksig "$rpm"
             fi
           done
