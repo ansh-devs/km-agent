@@ -25,7 +25,7 @@ jobs:
         if: matrix.target != 'windows'
         run: |
           sudo apt-get update
-          sudo apt-get install -y rpm gnupg2
+          sudo apt-get install -y rpm
       - name: Determine Version
         id: get_version
         run: |
@@ -63,26 +63,39 @@ jobs:
       - name: Import GPG Key for Signing
         if: matrix.target != 'windows'
         run: |
-          GNUPGHOME=/home/runner/.gnupg
-          mkdir -p $GNUPGHOME
-          chmod 700 $GNUPGHOME
-          echo -n "${{ secrets.RPM_GPG_PASSPHRASE }}" > $GNUPGHOME/passphrase
-          chmod 600 $GNUPGHOME/passphrase
-          printf 'no-tty\nbatch\nuse-agent\npinentry-mode loopback\npassphrase-file %s/passphrase\n' "$GNUPGHOME" > $GNUPGHOME/gpg.conf
-          echo "${{ secrets.RPM_GPG_PRIVATE_KEY }}" | GNUPGHOME=$GNUPGHOME gpg --batch --import
-          GNUPGHOME=$GNUPGHOME gpg --armor --export "amitava@kloudmate.com" > /tmp/gpg-public-key.gpg
-          sudo rpm --import /tmp/gpg-public-key.gpg
-          rm /tmp/gpg-public-key.gpg
+          mkdir -p ~/.gnupg
+          chmod 700 ~/.gnupg
+          cat > ~/.gnupg/gpg-agent.conf <<EOF
+          allow-loopback-pinentry
+          default-cache-ttl 86400
+          max-cache-ttl 86400
+          EOF
+          cat > ~/.gnupg/gpg.conf <<EOF
+          use-agent
+          no-tty
+          batch
+          pinentry-mode loopback
+          EOF
+          gpgconf --kill gpg-agent
+          gpgconf --launch gpg-agent
+          echo "${{ secrets.RPM_GPG_PRIVATE_KEY }}" | gpg --batch --import
+          FINGERPRINT=$(gpg --list-keys --with-colons "amitava@kloudmate.com" | grep "^fpr" | head -1 | cut -d: -f10)
+          echo "$FINGERPRINT:6:" | gpg --import-ownertrust
+          gpg --armor --export "amitava@kloudmate.com" > /tmp/gpg-public-key.asc
+          sudo rpm --import /tmp/gpg-public-key.asc
+          rm /tmp/gpg-public-key.asc
       - name: Sign Linux RPM packages
         if: matrix.target != 'windows'
+        env:
+          GPG_PASSPHRASE: ${{ secrets.RPM_GPG_PASSPHRASE }}
         run: |
-          export GNUPGHOME=/home/runner/.gnupg
-          export GPG_TTY=/dev/null
-          export PINENTRY_MODE=loopback
           for rpm in dist/rpm-*/RPMS/*/*.rpm; do
             if [ -f "$rpm" ]; then
               echo "Signing $rpm..."
-              rpm --define "_gpg_name amitava@kloudmate.com" --resign "$rpm"
+              rpmsign \
+                --define "_gpg_name amitava@kloudmate.com" \
+                --define "_gpg_sign_cmd_extra_args --batch --pinentry-mode loopback --passphrase-fd 0" \
+                --addsign "$rpm" <<< "$GPG_PASSPHRASE"
               rpm --checksig "$rpm"
             fi
           done
