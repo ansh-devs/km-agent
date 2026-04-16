@@ -70,7 +70,7 @@ jobs:
           chmod 600 $GNUPGHOME/passphrase
           printf 'no-tty\nbatch\nuse-agent\npinentry-mode loopback\npassphrase-file %s/passphrase\n' "$GNUPGHOME" > $GNUPGHOME/gpg.conf
           echo "${{ secrets.RPM_GPG_PRIVATE_KEY }}" | GNUPGHOME=$GNUPGHOME gpg --batch --import
-          GNUPGHOME=$GNUPGHOME gpg --export "amitava@kloudmate.com" > /tmp/gpg-public-key.gpg
+          GNUPGHOME=$GNUPGHOME gpg --armor --export "amitava@kloudmate.com" > /tmp/gpg-public-key.gpg
           sudo rpm --import /tmp/gpg-public-key.gpg
           rm /tmp/gpg-public-key.gpg
       - name: Sign Linux RPM packages
