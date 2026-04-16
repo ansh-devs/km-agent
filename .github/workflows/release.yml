@@ -27,7 +27,7 @@ jobs:
         if: matrix.target != 'windows'
         run: |
           sudo apt-get update
-          sudo apt-get install -y rpm
+          sudo apt-get install -y rpm expect
       - name: Determine Version
         id: get_version
         run: |
@@ -65,22 +65,22 @@ jobs:
       - name: Import GPG Key for Signing
         if: matrix.target != 'windows'
         run: |
-          echo "${{ secrets.RPM_GPG_PRIVATE_KEY }}" | gpg --batch --import
           mkdir -p ~/.gnupg
-          echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
+          chmod 700 ~/.gnupg
           echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
           gpgconf --kill gpg-agent
+          echo "${{ secrets.RPM_GPG_PRIVATE_KEY }}" | gpg --batch --import
       - name: Sign Linux RPM packages
         if: matrix.target != 'windows'
-        env:
-          GPG_PASSPHRASE: ${{ secrets.RPM_GPG_PASSPHRASE }}
         run: |
+          chmod +x scripts/sign_rpm.exp
+          # Ensure GPG has a TTY for pinentry if needed
+          export GPG_TTY=$(tty || echo /dev/pts/0)
           for rpm in dist/rpm-*/RPMS/*/*.rpm; do
             if [ -f "$rpm" ]; then
               echo "Signing $rpm..."
-              rpmsign --define "_gpg_name amitava@kloudmate.com" \
-                --define "_gpg_passphrase ${GPG_PASSPHRASE}" \
-                --addsign "$rpm"
+              ./scripts/sign_rpm.exp "$rpm" "amitava@kloudmate.com" "${{ secrets.RPM_GPG_PASSPHRASE }}"
+              # Verify signature
               rpm --checksig "$rpm"
             fi
           done
