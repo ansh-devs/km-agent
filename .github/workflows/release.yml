@@ -76,6 +76,8 @@ jobs:
         run: |
           chmod +x scripts/sign_rpm.exp
           export TERM=xterm
+          export GPG_AGENT_INFO=""
+          gpgconf --kill gpg-agent 2>/dev/null || true
           for rpm in dist/rpm-*/RPMS/*/*.rpm; do
             if [ -f "$rpm" ]; then
               echo "Signing $rpm..."
