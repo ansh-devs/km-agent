@@ -90,7 +90,7 @@ jobs:
           echo "=== Exporting public key for rpm ==="
           gpg --armor --export "amitava@kloudmate.com" > /tmp/gpg-public-key.asc
           cat /tmp/gpg-public-key.asc | head -5
-          sudo rpm --import /tmp/gpg-public-key.asc
+          rpm --import /tmp/gpg-public-key.asc
           rm /tmp/gpg-public-key.asc
       - name: Sign Linux RPM packages
         if: matrix.target != 'windows'
