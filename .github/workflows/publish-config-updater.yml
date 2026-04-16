@@ -22,6 +22,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Configure Git for private repos
+        run: git config --global url."https://${{ secrets.GHCR_PAT }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
