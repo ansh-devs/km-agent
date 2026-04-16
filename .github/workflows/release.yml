@@ -25,7 +25,7 @@ jobs:
         if: matrix.target != 'windows'
         run: |
           sudo apt-get update
-          sudo apt-get install -y rpm expect pinentry-tty
+          sudo apt-get install -y rpm gnupg2-utils
       - name: Determine Version
         id: get_version
         run: |
@@ -66,26 +66,30 @@ jobs:
           mkdir -p ~/.gnupg
           chmod 700 ~/.gnupg
           echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
-          echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
           gpgconf --kill gpg-agent 2>/dev/null || true
           killall gpg-agent 2>/dev/null || true
           sleep 1
           eval $(gpg-agent --daemon --sh)
+          sleep 1
           echo "${{ secrets.RPM_GPG_PRIVATE_KEY }}" | gpg --batch --import
+          KEYGRIP=$(gpg --list-secret-keys --with-keygrip "amitava@kloudmate.com" 2>/dev/null | grep "Keygrip" | head -1 | awk '{print $NF}')
+          if [ -n "$KEYGRIP" ]; then
+            echo "${{ secrets.RPM_GPG_PASSPHRASE }}" | gpg-preset-passphrase --preset --passphrase-fd 0 "$KEYGRIP"
+            echo "Passphrase cached for key: $KEYGRIP"
+          else
+            echo "Warning: Could not find keygrip"
+          fi
       - name: Sign Linux RPM packages
         if: matrix.target != 'windows'
         run: |
-          PASSPHRASE_FILE=$(mktemp)
-          echo -n "${{ secrets.RPM_GPG_PASSPHRASE }}" > $PASSPHRASE_FILE
-          chmod 600 $PASSPHRASE_FILE
+          export GPG_TTY=/dev/null
           for rpm in dist/rpm-*/RPMS/*/*.rpm; do
             if [ -f "$rpm" ]; then
               echo "Signing $rpm..."
-              rpm --define "_gpg_name amitava@kloudmate.com" --define "__gpg_passphrase_file $PASSPHRASE_FILE" --resign "$rpm"
+              rpm --define "_gpg_name amitava@kloudmate.com" --resign "$rpm"
               rpm --checksig "$rpm"
             fi
           done
-          rm -f $PASSPHRASE_FILE
       - name: Build Windows Installer package (using Docker via make)
         if: matrix.target == 'windows'
         run: make VERSION=${{ env.VERSION }} package-windows
