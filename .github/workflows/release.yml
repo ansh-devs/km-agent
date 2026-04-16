@@ -66,6 +66,7 @@ jobs:
           mkdir -p ~/.gnupg
           chmod 700 ~/.gnupg
           echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
+          echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
           gpgconf --kill gpg-agent 2>/dev/null || true
           killall gpg-agent 2>/dev/null || true
           sleep 1
@@ -74,12 +75,10 @@ jobs:
       - name: Sign Linux RPM packages
         if: matrix.target != 'windows'
         run: |
-          chmod +x scripts/sign_rpm.exp
           for rpm in dist/rpm-*/RPMS/*/*.rpm; do
             if [ -f "$rpm" ]; then
               echo "Signing $rpm..."
               ./scripts/sign_rpm.exp "$rpm" "amitava@kloudmate.com" "${{ secrets.RPM_GPG_PASSPHRASE }}"
-              # Verify signature
               rpm --checksig "$rpm"
             fi
           done
