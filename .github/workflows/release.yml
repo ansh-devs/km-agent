@@ -101,8 +101,6 @@ jobs:
           rpm -qa gpg-pubkey
           echo "=== GPG key info ==="
           gpg --list-keys --with-colons "amitava@kloudmate.com"
-          echo "=== Import pubkey to rpm ==="
-          gpg --armor --export "amitava@kloudmate.com" | sudo rpm --import -
           echo "=== RPM keyring after import ==="
           rpm -qa gpg-pubkey
           for rpm in dist/rpm-*/RPMS/*/*.rpm; do
