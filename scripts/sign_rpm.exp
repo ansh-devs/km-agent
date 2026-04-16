@@ -4,17 +4,18 @@ set rpm_file [lindex $argv 0]
 set gpg_name [lindex $argv 1]
 set passphrase [lindex $argv 2]
 
-# Set environment
-set env(LINES) 24
-set env(COLUMNS) 80
-set env(TERM) xterm
+set env(GPG_TTY) /dev/tty
+set env(PINENTRY_MODE) loopback
 
-# Spawn with bash to set terminal size and GPG_TTY for the current PTY
-spawn bash -c "stty rows 24 cols 80; export GPG_TTY=\$(tty); rpmsign --define \"_gpg_name $gpg_name\" --addsign $rpm_file"
+spawn bash -c "rpmsign --define \"_gpg_name $gpg_name\" --resign $rpm_file"
 
 expect {
     -nocase -re "pass *phrase" {
         send "$passphrase\r"
+    }
+    timeout {
+        puts "Timeout waiting for passphrase prompt"
+        exit 1
     }
 }
 expect eof
