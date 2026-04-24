@@ -1,0 +1,217 @@
+---
+# =============================================================================
+# KloudMate Agent - Main Tasks
+# =============================================================================
+
+# --- Uninstall path ---
+- name: Uninstall kmagent
+  when: kmagent_state == 'absent'
+  block:
+    - name: Stop kmagent service
+      systemd:
+        name: "{{ kmagent_service_name }}"
+        state: stopped
+        enabled: no
+      ignore_errors: yes
+
+    - name: Remove kmagent binary
+      file:
+        path: "{{ kmagent_binary_path }}"
+        state: absent
+
+    - name: Remove kmagent config
+      file:
+        path: "{{ kmagent_config_dir }}"
+        state: absent
+
+    - name: Remove systemd unit
+      file:
+        path: "/etc/systemd/system/{{ kmagent_service_name }}.service"
+        state: absent
+      notify: reload systemd
+
+    - name: Remove kmagent user
+      user:
+        name: "{{ kmagent_service_user }}"
+        state: absent
+        remove: yes
+
+    - meta: end_play
+  tags: [uninstall]
+
+# --- Install path ---
+- name: Gather OS-specific facts
+  setup:
+    filter: "ansible_*"
+  tags: [install]
+
+- name: Set architecture mapping
+  set_fact:
+    kmagent_arch: >-
+      {%- if ansible_architecture == 'x86_64' -%}amd64
+      {%- elif ansible_architecture == 'aarch64' -%}arm64
+      {%- else -%}{{ ansible_architecture }}
+      {%- endif -%}
+  tags: [install]
+
+# --- Prerequisites ---
+- name: Install prerequisites (Debian/Ubuntu)
+  apt:
+    name: [curl, tar, systemd]
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600
+  when: ansible_os_family == "Debian"
+  tags: [install]
+
+- name: Install prerequisites (RHEL/CentOS/Amazon)
+  yum:
+    name: [curl, tar, systemd]
+    state: present
+  when: ansible_os_family == "RedHat"
+  tags: [install]
+
+- name: Install prerequisites (SUSE)
+  zypper:
+    name: [curl, tar, systemd]
+    state: present
+  when: ansible_os_family == "Suse"
+  tags: [install]
+
+# --- User & directories ---
+- name: Create kmagent system group
+  group:
+    name: "{{ kmagent_service_group }}"
+    system: yes
+    state: present
+  tags: [install]
+
+- name: Create kmagent system user
+  user:
+    name: "{{ kmagent_service_user }}"
+    group: "{{ kmagent_service_group }}"
+    system: yes
+    shell: /usr/sbin/nologin
+    home: "{{ kmagent_config_dir }}"
+    create_home: no
+  tags: [install]
+
+- name: Create directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ kmagent_service_user }}"
+    group: "{{ kmagent_service_group }}"
+    mode: "0755"
+  loop:
+    - "{{ kmagent_config_dir }}"
+    - "{{ kmagent_log_dir }}"
+  tags: [install]
+
+# --- Check current version ---
+- name: Check if kmagent is already installed
+  stat:
+    path: "{{ kmagent_binary_path }}"
+  register: kmagent_binary_stat
+  tags: [install, upgrade]
+
+- name: Get current kmagent version
+  command: "{{ kmagent_binary_path }} --version"
+  register: kmagent_current_version
+  changed_when: false
+  failed_when: false
+  when: kmagent_binary_stat.stat.exists
+  tags: [install, upgrade]
+
+# --- Download & install ---
+- name: Download kmagent install script
+  get_url:
+    url: "{{ kmagent_install_script_url }}"
+    dest: /tmp/install-kmagent.sh
+    mode: "0755"
+    timeout: 30
+  environment:
+    http_proxy: "{{ kmagent_http_proxy | default(omit) }}"
+    https_proxy: "{{ kmagent_https_proxy | default(omit) }}"
+  tags: [install, upgrade]
+
+- name: Run kmagent install script
+  command: >
+    /tmp/install-kmagent.sh
+    {% if kmagent_version != 'latest' %}--version {{ kmagent_version }}{% endif %}
+  environment:
+    http_proxy: "{{ kmagent_http_proxy | default(omit) }}"
+    https_proxy: "{{ kmagent_https_proxy | default(omit) }}"
+  register: kmagent_install_result
+  changed_when: "'already installed' not in kmagent_install_result.stdout"
+  tags: [install, upgrade]
+
+- name: Cleanup install script
+  file:
+    path: /tmp/install-kmagent.sh
+    state: absent
+  tags: [install, upgrade]
+
+# --- Configuration ---
+- name: Deploy kmagent configuration
+  template:
+    src: agent.yaml.j2
+    dest: "{{ kmagent_config_file }}"
+    owner: "{{ kmagent_service_user }}"
+    group: "{{ kmagent_service_group }}"
+    mode: "0640"
+  notify: restart kmagent
+  tags: [configure]
+
+- name: Deploy systemd unit file
+  template:
+    src: kmagent.service.j2
+    dest: "/etc/systemd/system/{{ kmagent_service_name }}.service"
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - reload systemd
+    - restart kmagent
+  tags: [configure]
+
+# --- Service management ---
+- name: Enable and start kmagent
+  systemd:
+    name: "{{ kmagent_service_name }}"
+    state: started
+    enabled: yes
+    daemon_reload: yes
+  tags: [install, configure]
+
+# --- Health check ---
+- name: Wait for kmagent to become healthy
+  uri:
+    url: "http://127.0.0.1:{{ kmagent_health_port }}"
+    method: GET
+    status_code: [200, 204]
+  register: health_check
+  retries: 10
+  delay: 3
+  until: health_check.status in [200, 204]
+  ignore_errors: yes
+  tags: [install, configure]
+
+- name: Report health status
+  debug:
+    msg: "{{ 'kmagent is healthy and running' if health_check.status | default(0) in [200, 204] else 'WARNING: kmagent health check failed - check logs at ' + kmagent_log_dir }}"
+  tags: [install, configure]
+
+# --- Auto-update cron ---
+- name: Setup auto-update cron
+  cron:
+    name: "kmagent-auto-update"
+    job: "curl -fsSL {{ kmagent_install_script_url }} | bash -s -- --upgrade >> {{ kmagent_log_dir }}/upgrade.log 2>&1"
+    minute: "{{ kmagent_auto_update_cron.split()[0] }}"
+    hour: "{{ kmagent_auto_update_cron.split()[1] }}"
+    day: "{{ kmagent_auto_update_cron.split()[2] }}"
+    month: "{{ kmagent_auto_update_cron.split()[3] }}"
+    weekday: "{{ kmagent_auto_update_cron.split()[4] }}"
+    user: root
+    state: "{{ 'present' if kmagent_auto_update else 'absent' }}"
+  tags: [configure]

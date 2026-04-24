@@ -1,0 +1,10 @@
+---
+- name: reload systemd
+  systemd:
+    daemon_reload: yes
+
+- name: restart kmagent
+  systemd:
+    name: "{{ kmagent_service_name }}"
+    state: restarted
+    enabled: yes

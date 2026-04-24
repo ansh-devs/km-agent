@@ -1,0 +1,48 @@
+# =============================================================================
+# KloudMate Agent - systemd service
+# Managed by Ansible - DO NOT EDIT MANUALLY
+# =============================================================================
+[Unit]
+Description=KloudMate Observability Agent
+Documentation=https://docs.kloudmate.com/agent
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User={{ kmagent_service_user }}
+Group={{ kmagent_service_group }}
+ExecStart={{ kmagent_binary_path }} \
+  --config {{ kmagent_config_file }} \
+  {{ kmagent_extra_args }}
+Restart=always
+RestartSec=5
+StartLimitInterval=60
+StartLimitBurst=5
+
+# --- Resource limits ---
+MemoryMax={{ kmagent_memory_limit_mib }}M
+CPUQuota={{ kmagent_cpu_limit_percentage }}%
+
+# --- Logging ---
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier={{ kmagent_service_name }}
+
+# --- Security hardening ---
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ReadWritePaths={{ kmagent_log_dir }}
+ReadOnlyPaths={{ kmagent_config_dir }}
+
+{% if kmagent_http_proxy %}
+# --- Proxy ---
+Environment="HTTP_PROXY={{ kmagent_http_proxy }}"
+Environment="HTTPS_PROXY={{ kmagent_https_proxy }}"
+Environment="NO_PROXY={{ kmagent_no_proxy }}"
+{% endif %}
+
+[Install]
+WantedBy=multi-user.target

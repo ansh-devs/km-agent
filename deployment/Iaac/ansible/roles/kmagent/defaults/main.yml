@@ -1,0 +1,48 @@
+---
+# =============================================================================
+# KloudMate Agent - Default Variables
+# Override these in group_vars, host_vars, or via -e on the CLI
+# =============================================================================
+
+# --- Required (must be provided) ---
+# km_api_key: ""
+# km_endpoint: "https://ingest.kloudmate.com"
+
+# --- Agent version & source ---
+kmagent_version: "latest"
+kmagent_install_script_url: "https://raw.githubusercontent.com/kloudmate/km-agent/main/install.sh"
+kmagent_binary_path: "/usr/local/bin/kmagent"
+kmagent_config_dir: "/etc/kloudmate"
+kmagent_config_file: "{{ kmagent_config_dir }}/agent.yaml"
+kmagent_log_dir: "/var/log/kloudmate"
+
+# --- Service configuration ---
+kmagent_service_name: "kmagent"
+kmagent_service_user: "kloudmate"
+kmagent_service_group: "kloudmate"
+
+# --- Agent config ---
+kmagent_log_level: "info"
+kmagent_tags: {}                    # key-value tags: { env: production, team: infra }
+kmagent_extra_args: ""              # additional CLI args passed to agent
+
+# --- Collector / OTel settings ---
+kmagent_otlp_port: 4317
+kmagent_health_port: 13133
+kmagent_metrics_port: 8888
+
+# --- Resource limits ---
+kmagent_memory_limit_mib: 512
+kmagent_cpu_limit_percentage: 50
+
+# --- Proxy (for restricted networks) ---
+kmagent_http_proxy: ""
+kmagent_https_proxy: ""
+kmagent_no_proxy: "localhost,127.0.0.1,169.254.169.254"
+
+# --- Auto-update ---
+kmagent_auto_update: false
+kmagent_auto_update_cron: "0 3 * * 0"  # Weekly Sunday 3AM
+
+# --- Uninstall ---
+kmagent_state: present              # set to 'absent' to uninstall

@@ -1,0 +1,55 @@
+# =============================================================================
+# KloudMate Agent Configuration
+# Managed by Ansible - DO NOT EDIT MANUALLY
+# Generated: {{ ansible_date_time.iso8601 }}
+# Host: {{ inventory_hostname }}
+# =============================================================================
+
+api_key: "{{ km_api_key }}"
+endpoint: "{{ km_endpoint }}"
+
+log_level: "{{ kmagent_log_level }}"
+log_dir: "{{ kmagent_log_dir }}"
+
+# --- Ports ---
+otlp_port: {{ kmagent_otlp_port }}
+health_port: {{ kmagent_health_port }}
+metrics_port: {{ kmagent_metrics_port }}
+
+# --- Resource limits ---
+memory_limit_mib: {{ kmagent_memory_limit_mib }}
+
+# --- Host metadata ---
+host:
+  hostname: "{{ ansible_hostname }}"
+  os: "{{ ansible_distribution }} {{ ansible_distribution_version }}"
+  arch: "{{ ansible_architecture }}"
+  cloud: "{{ cloud_provider | trim }}"
+{% if cloud_provider | trim == 'aws' %}
+  region: "{{ ansible_ec2_placement_region | default('unknown') }}"
+  instance_id: "{{ ansible_ec2_instance_id | default('unknown') }}"
+  instance_type: "{{ ansible_ec2_instance_type | default('unknown') }}"
+{% elif cloud_provider | trim == 'gcp' %}
+  zone: "{{ ansible_gcp_zone | default('unknown') }}"
+  instance_id: "{{ ansible_gcp_id | default('unknown') }}"
+  machine_type: "{{ ansible_gcp_machineType | default('unknown') }}"
+{% elif cloud_provider | trim == 'azure' %}
+  location: "{{ ansible_azure_location | default('unknown') }}"
+  vm_id: "{{ ansible_azure_vm_id | default('unknown') }}"
+  vm_size: "{{ ansible_azure_vm_size | default('unknown') }}"
+{% endif %}
+
+# --- Tags ---
+tags:
+  managed_by: "ansible"
+{% for key, value in kmagent_tags.items() %}
+  {{ key }}: "{{ value }}"
+{% endfor %}
+
+{% if kmagent_http_proxy %}
+# --- Proxy ---
+proxy:
+  http: "{{ kmagent_http_proxy }}"
+  https: "{{ kmagent_https_proxy }}"
+  no_proxy: "{{ kmagent_no_proxy }}"
+{% endif %}

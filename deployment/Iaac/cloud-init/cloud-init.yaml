@@ -1,0 +1,106 @@
+#cloud-config
+# =============================================================================
+# KloudMate Agent - cloud-init Configuration
+# =============================================================================
+# Works on: AWS (User Data), GCP (Startup Script), Azure (Custom Data),
+#           DigitalOcean (User Data), Alibaba (User Data), Hetzner, Vultr, etc.
+#
+# Usage:
+#   AWS:          Paste in Launch Template > User Data (base64 encoded)
+#   GCP:          --metadata-from-file user-data=cloud-init.yaml
+#   Azure:        --custom-data cloud-init.yaml
+#   DigitalOcean: --user-data cloud-init.yaml
+#   Alibaba:      Paste in Instance > Advanced > User Data
+# =============================================================================
+
+# --- System packages ---
+package_update: true
+packages:
+  - curl
+  - jq
+
+# --- Create kloudmate user ---
+users:
+  - name: kloudmate
+    system: true
+    shell: /usr/sbin/nologin
+    no_create_home: true
+
+# --- Create directories ---
+runcmd:
+  # -----------------------------------------------
+  # 1. Fetch API key from cloud-native secret store
+  # -----------------------------------------------
+  # Option A: Hardcoded (dev/testing only)
+  - export KM_API_KEY="YOUR_API_KEY_HERE"
+  - export KM_ENDPOINT="https://ingest.kloudmate.com"
+
+  # Option B: AWS SSM Parameter Store (uncomment if using AWS)
+  # - export KM_API_KEY=$(aws ssm get-parameter --name "/kloudmate/api-key" --with-decryption --query "Parameter.Value" --output text --region $(curl -s http://169.254.169.254/latest/meta-data/placement/region))
+
+  # Option C: GCP Secret Manager (uncomment if using GCP)
+  # - export KM_API_KEY=$(gcloud secrets versions access latest --secret="kloudmate-api-key")
+
+  # Option D: Azure Key Vault (uncomment if using Azure)
+  # - export KM_API_KEY=$(az keyvault secret show --name "kloudmate-api-key" --vault-name "your-vault" --query "value" -o tsv)
+
+  # -----------------------------------------------
+  # 2. Install kmagent
+  # -----------------------------------------------
+  - |
+    echo "[kloudmate] Installing kmagent..."
+    curl -fsSL https://raw.githubusercontent.com/kloudmate/km-agent/main/install.sh \
+      | bash -s -- --api-key "$KM_API_KEY" --endpoint "$KM_ENDPOINT"
+
+  # -----------------------------------------------
+  # 3. Detect cloud provider & enrich metadata
+  # -----------------------------------------------
+  - |
+    CLOUD="unknown"
+    INSTANCE_ID="unknown"
+    REGION="unknown"
+
+    # AWS
+    if curl -sf -m 2 http://169.254.169.254/latest/meta-data/ami-id > /dev/null 2>&1; then
+      CLOUD="aws"
+      TOKEN=$(curl -sf -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 60")
+      INSTANCE_ID=$(curl -sf -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/instance-id)
+      REGION=$(curl -sf -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/placement/region)
+    # GCP
+    elif curl -sf -m 2 -H "Metadata-Flavor: Google" http://169.254.169.254/computeMetadata/v1/instance/id > /dev/null 2>&1; then
+      CLOUD="gcp"
+      INSTANCE_ID=$(curl -sf -H "Metadata-Flavor: Google" http://169.254.169.254/computeMetadata/v1/instance/id)
+      REGION=$(curl -sf -H "Metadata-Flavor: Google" http://169.254.169.254/computeMetadata/v1/instance/zone | awk -F/ '{print $NF}')
+    # Azure
+    elif curl -sf -m 2 -H "Metadata: true" "http://169.254.169.254/metadata/instance?api-version=2021-02-01" > /dev/null 2>&1; then
+      CLOUD="azure"
+      META=$(curl -sf -H "Metadata: true" "http://169.254.169.254/metadata/instance?api-version=2021-02-01")
+      INSTANCE_ID=$(echo "$META" | jq -r '.compute.vmId')
+      REGION=$(echo "$META" | jq -r '.compute.location')
+    # DigitalOcean
+    elif curl -sf -m 2 http://169.254.169.254/metadata/v1/id > /dev/null 2>&1; then
+      CLOUD="digitalocean"
+      INSTANCE_ID=$(curl -sf http://169.254.169.254/metadata/v1/id)
+      REGION=$(curl -sf http://169.254.169.254/metadata/v1/region)
+    # Alibaba
+    elif curl -sf -m 2 http://100.100.100.200/latest/meta-data/instance-id > /dev/null 2>&1; then
+      CLOUD="alibaba"
+      INSTANCE_ID=$(curl -sf http://100.100.100.200/latest/meta-data/instance-id)
+      REGION=$(curl -sf http://100.100.100.200/latest/meta-data/region-id)
+    fi
+
+    echo "[kloudmate] Cloud: $CLOUD | Instance: $INSTANCE_ID | Region: $REGION"
+
+  # -----------------------------------------------
+  # 4. Verify installation
+  # -----------------------------------------------
+  - |
+    if systemctl is-active --quiet kmagent; then
+      echo "[kloudmate] Agent installed and running successfully"
+    else
+      echo "[kloudmate] ERROR: Agent failed to start, check: journalctl -u kmagent"
+      exit 1
+    fi
+
+# --- Log output ---
+final_message: "KloudMate agent provisioning complete after $UPTIME seconds"

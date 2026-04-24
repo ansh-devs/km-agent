@@ -1,0 +1,59 @@
+---
+# =============================================================================
+# KloudMate Agent (kmagent) - Multi-Cloud Deployment Playbook
+# =============================================================================
+# Usage:
+#   ansible-playbook -i inventories/production.ini deploy-kmagent.yml
+#   ansible-playbook -i inventories/production.ini deploy-kmagent.yml --tags install
+#   ansible-playbook -i inventories/production.ini deploy-kmagent.yml --tags configure
+#   ansible-playbook -i inventories/production.ini deploy-kmagent.yml --tags upgrade
+#   ansible-playbook -i inventories/production.ini deploy-kmagent.yml -e "kmagent_version=1.2.0"
+#
+# Supported platforms: Ubuntu/Debian, RHEL/CentOS/Amazon Linux, SUSE
+# Supported clouds: AWS, GCP, Azure, DigitalOcean, Alibaba, on-prem
+# =============================================================================
+
+- name: Deploy KloudMate Agent
+  hosts: all
+  become: yes
+  gather_facts: yes
+
+  pre_tasks:
+    - name: Validate required variables
+      assert:
+        that:
+          - km_api_key is defined and km_api_key | length > 0
+          - km_endpoint is defined and km_endpoint | length > 0
+        fail_msg: >
+          Missing required variables. Pass them via:
+            -e "km_api_key=YOUR_KEY km_endpoint=https://ingest.kloudmate.com"
+          Or set them in group_vars/defaults.
+
+    - name: Detect cloud provider
+      set_fact:
+        cloud_provider: >-
+          {%- if ansible_system_vendor is defined -%}
+            {%- if 'Amazon' in ansible_system_vendor or 'Xen' in ansible_system_vendor -%}aws
+            {%- elif 'Google' in ansible_system_vendor -%}gcp
+            {%- elif 'Microsoft' in ansible_system_vendor -%}azure
+            {%- elif 'DigitalOcean' in ansible_system_vendor -%}digitalocean
+            {%- elif 'Alibaba' in ansible_system_vendor -%}alibaba
+            {%- else -%}onprem
+            {%- endif -%}
+          {%- else -%}onprem
+          {%- endif -%}
+      tags: always
+
+    - name: Display deployment info
+      debug:
+        msg: |
+          Target: {{ inventory_hostname }}
+          OS: {{ ansible_distribution }} {{ ansible_distribution_version }}
+          Arch: {{ ansible_architecture }}
+          Cloud: {{ cloud_provider | trim }}
+          Agent Version: {{ kmagent_version | default('latest') }}
+      tags: always
+
+  roles:
+    - role: kmagent
+      tags: [install, configure, upgrade]
