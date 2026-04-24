@@ -75,28 +75,43 @@ jobs:
           no-tty
           batch
           pinentry-mode loopback
+          passphrase-file /home/runner/.gnupg/passphrase
           EOF
           gpgconf --kill gpg-agent
           gpgconf --launch gpg-agent
+          echo -n "${{ secrets.RPM_GPG_PASSPHRASE }}" > ~/.gnupg/passphrase
+          chmod 600 ~/.gnupg/passphrase
           echo "${{ secrets.RPM_GPG_PRIVATE_KEY }}" | gpg --batch --import
-          FINGERPRINT=$(gpg --list-keys --with-colons "amitava@kloudmate.com" | grep "^fpr" | head -1 | cut -d: -f10)
+          echo "=== Imported GPG keys ==="
+          gpg --list-secret-keys
+          FINGERPRINT=$(gpg --list-secret-keys --with-colons "amitava@kloudmate.com" | grep "^fpr" | head -1 | cut -d: -f10)
+          echo "Fingerprint: $FINGERPRINT"
           echo "$FINGERPRINT:6:" | gpg --import-ownertrust
+          echo "=== Exporting public key for rpm ==="
           gpg --armor --export "amitava@kloudmate.com" > /tmp/gpg-public-key.asc
-          sudo rpm --import /tmp/gpg-public-key.asc
+          cat /tmp/gpg-public-key.asc | head -5
+          rpm --import /tmp/gpg-public-key.asc
           rm /tmp/gpg-public-key.asc
       - name: Sign Linux RPM packages
         if: matrix.target != 'windows'
-        env:
-          GPG_PASSPHRASE: ${{ secrets.RPM_GPG_PASSPHRASE }}
         run: |
+          echo "=== RPM sigs before signing ==="
+          rpm --checksig -v dist/rpm-*/RPMS/*/*.rpm 2>&1 || true
+          echo "=== RPM keyring ==="
+          rpm -qa gpg-pubkey
+          echo "=== GPG key info ==="
+          gpg --list-keys --with-colons "amitava@kloudmate.com"
+          echo "=== RPM keyring after import ==="
+          rpm -qa gpg-pubkey
           for rpm in dist/rpm-*/RPMS/*/*.rpm; do
             if [ -f "$rpm" ]; then
               echo "Signing $rpm..."
               rpmsign \
                 --define "_gpg_name amitava@kloudmate.com" \
-                --define "_gpg_sign_cmd_extra_args --batch --pinentry-mode loopback --passphrase-fd 0" \
-                --addsign "$rpm" <<< "$GPG_PASSPHRASE"
-              rpm --checksig "$rpm"
+                --define "_gpg_sign_cmd_extra_args --batch --pinentry-mode loopback" \
+                --addsign "$rpm"
+              echo "=== Checking signature ==="
+              rpm --checksig -v "$rpm"
             fi
           done
       - name: Build Windows Installer package (using Docker via make)
