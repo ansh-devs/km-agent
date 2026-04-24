@@ -10,7 +10,9 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/filterprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/groupbyattrsprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/groupbytraceprocessor"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/intervalprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/isolationforestprocessor"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/logdedupprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/metricstransformprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/probabilisticsamplerprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/redactionprocessor"
@@ -18,6 +20,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/resourceprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/spanprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/transformprocessor"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/unrollprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/apachereceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awscloudwatchmetricsreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awscloudwatchreceiver"
@@ -88,7 +91,7 @@ func BaseReceiverFactories() []receiver.Factory {
 		netflowreceiver.NewFactory(),
 		snmpreceiver.NewFactory(),
 		fluentforwardreceiver.NewFactory(),
-		
+
 		apachereceiver.NewFactory(),
 		elasticsearchreceiver.NewFactory(),
 		kafkametricsreceiver.NewFactory(),
@@ -140,6 +143,9 @@ func BaseProcessorFactories() []processor.Factory {
 		transformprocessor.NewFactory(),
 		groupbyattrsprocessor.NewFactory(),
 		spanprocessor.NewFactory(),
+		logdedupprocessor.NewFactory(),
+		unrollprocessor.NewFactory(),
+		intervalprocessor.NewFactory(),
 		groupbytraceprocessor.NewFactory(),
 		isolationforestprocessor.NewFactory(),
 	}
