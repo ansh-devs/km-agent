@@ -1,10 +1,12 @@
 package clouddetect
 
 import (
+	"bufio"
 	"context"
 	"net/http"
 	"os"
 	"runtime"
+	"strings"
 	"sync"
 	"time"
 
@@ -147,8 +149,12 @@ func (d *Detector) detectCrossCuttingSignals(env *CloudEnvironment) {
 		env.Metadata = map[string]string{}
 	}
 
-	// check for Docker socket
-	if _, err := os.Stat("/var/run/docker.sock"); err == nil {
+	// Enable the "docker" detector only when the Docker socket is available
+	// AND the agent is actually running inside a Docker container.
+	// The docker resource detector calls "docker inspect" on the current
+	// container; if the agent runs on a bare host that merely has Docker
+	// installed, the inspect call fails fatally.
+	if _, err := os.Stat("/var/run/docker.sock"); err == nil && isInsideDockerContainer() {
 		env.Metadata["docker"] = "true"
 	}
 
@@ -170,6 +176,29 @@ func isKubernetes() bool {
 	}
 	if os.Getenv("KUBERNETES_SERVICE_HOST") != "" {
 		return true
+	}
+	return false
+}
+
+// isInsideDockerContainer checks whether the current process is running inside a Docker container
+func isInsideDockerContainer() bool {
+	// /.dockerenv is created by the Docker runtime inside every container.
+	if _, err := os.Stat("/.dockerenv"); err == nil {
+		return true
+	}
+
+	f, err := os.Open("/proc/self/cgroup")
+	if err != nil {
+		return false
+	}
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if strings.Contains(line, "docker") || strings.Contains(line, "containerd") {
+			return true
+		}
 	}
 	return false
 }
